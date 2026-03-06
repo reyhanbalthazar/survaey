@@ -1,0 +1,35 @@
+<section class="page">
+  <h1>Enter Email</h1>
+  <p class="subtitle">Use one email for one survey submission only.</p>
+
+  @if (loading) {
+    <p>Loading surveys...</p>
+  } @else {
+    <form [formGroup]="form" (ngSubmit)="continueToSurvey()">
+      <label for="surveyCode">Choose survey</label>
+      <select id="surveyCode" formControlName="surveyCode">
+        @for (survey of surveys; track survey.id) {
+          <option [value]="survey.survey_code">{{ survey.title }}</option>
+        }
+      </select>
+
+      <label for="email">Email</label>
+      <input id="email" type="email" formControlName="email" placeholder="you@example.com" />
+
+      @if (form.controls.email.touched && form.controls.email.errors?.['required']) {
+        <small>Email is required.</small>
+      }
+      @if (form.controls.email.touched && form.controls.email.errors?.['email']) {
+        <small>Use a valid email format.</small>
+      }
+
+      @if (localError) {
+        <p class="error">{{ localError }}</p>
+      }
+
+      <button type="submit" [disabled]="checking || form.invalid">
+        {{ checking ? 'Checking...' : 'Continue to Survey' }}
+      </button>
+    </form>
+  }
+</section>

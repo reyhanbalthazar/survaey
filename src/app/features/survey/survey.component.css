@@ -1,0 +1,110 @@
+.page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 1.4rem 1rem 3rem;
+}
+
+header {
+  margin-bottom: 1rem;
+}
+
+.email {
+  margin: 0;
+  color: #334155;
+  font-size: 0.9rem;
+}
+
+h1 {
+  margin: 0.2rem 0 0.7rem;
+  font-size: 1.5rem;
+}
+
+.progress-wrap {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.bar {
+  height: 0.5rem;
+  border-radius: 999px;
+  background: #e2e8f0;
+  overflow: hidden;
+}
+
+.value {
+  height: 100%;
+  background: linear-gradient(90deg, #0f766e, #0ea5e9);
+}
+
+form {
+  display: grid;
+  gap: 0.9rem;
+}
+
+article {
+  border: 1px solid #cbd5e1;
+  border-radius: 0.75rem;
+  padding: 0.8rem;
+  display: grid;
+  gap: 0.6rem;
+  background: #fff;
+}
+
+label {
+  font-weight: 600;
+}
+
+span {
+  color: #b91c1c;
+}
+
+input,
+textarea {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.55rem;
+  padding: 0.55rem 0.7rem;
+  font: inherit;
+}
+
+.options {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.options label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+}
+
+.options input {
+  width: auto;
+}
+
+.rating {
+  grid-template-columns: repeat(5, minmax(0, max-content));
+}
+
+.error {
+  margin: 0;
+  color: #b91c1c;
+  font-size: 0.85rem;
+}
+
+button {
+  border: 0;
+  border-radius: 0.65rem;
+  padding: 0.75rem 1rem;
+  background: #0f766e;
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  background: #64748b;
+}

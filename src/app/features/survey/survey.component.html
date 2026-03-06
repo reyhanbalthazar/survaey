@@ -1,0 +1,99 @@
+<section class="page">
+  @if (loadingSurvey) {
+    <p>Loading survey...</p>
+  } @else if (survey) {
+    <header>
+      <p class="email">Respondent: {{ email }}</p>
+      <h1>{{ survey.title }}</h1>
+      <div class="progress-wrap" aria-label="Survey progress">
+        <div class="bar">
+          <div class="value" [style.width.%]="progressPercent"></div>
+        </div>
+        <small>{{ answeredRequiredCount }}/{{ requiredQuestions.length }} required answered</small>
+      </div>
+    </header>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      @for (q of survey.questions; track q.id) {
+        <article>
+          <label [for]="'q-' + q.id">
+            {{ q.question_text }}
+            @if (q.is_required !== false) {
+              <span>*</span>
+            }
+          </label>
+
+          @if (q.help_text) {
+            <small [innerHTML]="q.help_text"></small>
+          }
+
+          @if (isTextType(q)) {
+            <input
+              [id]="'q-' + q.id"
+              type="text"
+              [placeholder]="q.placeholder ?? ''"
+              [formControlName]="q.id.toString()"
+            />
+          }
+
+          @if (isTextareaType(q)) {
+            <textarea
+              [id]="'q-' + q.id"
+              rows="4"
+              [placeholder]="q.placeholder ?? ''"
+              [formControlName]="q.id.toString()"
+            ></textarea>
+          }
+
+          @if (isSingleChoiceType(q)) {
+            <div class="options">
+              @for (option of q.options ?? []; track option) {
+                <label>
+                  <input type="radio" [value]="option" [formControlName]="q.id.toString()" />
+                  {{ option }}
+                </label>
+              }
+            </div>
+          }
+
+          @if (isCheckboxType(q)) {
+            <div class="options">
+              @for (option of q.options ?? []; track option) {
+                <label>
+                  <input
+                    type="checkbox"
+                    [checked]="isChecked(q.id, option.toString())"
+                    (change)="toggleCheckbox(q.id, option.toString())"
+                  />
+                  {{ option }}
+                </label>
+              }
+            </div>
+          }
+
+          @if (isRatingType(q)) {
+            <div class="options rating">
+              @for (option of q.options ?? [1, 2, 3, 4, 5]; track option) {
+                <label>
+                  <input type="radio" [value]="option" [formControlName]="q.id.toString()" />
+                  {{ option }}
+                </label>
+              }
+            </div>
+          }
+
+          @if (hasError(q)) {
+            <p class="error">This answer is required or invalid.</p>
+          }
+        </article>
+      }
+
+      <button type="submit" [disabled]="submitting || submitted || form.invalid">
+        {{ submitting ? 'Submitting...' : submitted ? 'Submitted' : 'Submit Survey' }}
+      </button>
+    </form>
+  } @else {
+    <p>Survey not found.</p>
+    <a routerLink="/">Back to landing</a>
+  }
+</section>

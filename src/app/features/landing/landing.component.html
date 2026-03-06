@@ -1,0 +1,20 @@
+<section class="page">
+  <header>
+    <p class="badge">Production Survey System</p>
+    <h1>Choose a business to start survey</h1>
+    <p class="subtitle">Fast, mobile-friendly, and dynamic from API.</p>
+  </header>
+
+  @if (loading) {
+    <p class="loading">Loading businesses...</p>
+  } @else {
+    <div class="grid">
+      @for (org of organizations; track org.id) {
+        <button type="button" (click)="goToEmailPage(org.slug)">
+          <h2>{{ org.name }}</h2>
+          <p>{{ org.slug }}</p>
+        </button>
+      }
+    </div>
+  }
+</section>

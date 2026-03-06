@@ -1,0 +1,6 @@
+@if (message$ | async; as message) {
+  <section class="error-banner" role="alert" aria-live="assertive">
+    <p>{{ message }}</p>
+    <button type="button" (click)="clear()">Dismiss</button>
+  </section>
+}

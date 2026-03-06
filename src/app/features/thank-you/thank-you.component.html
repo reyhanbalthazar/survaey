@@ -1,0 +1,11 @@
+<section class="page">
+  <p class="badge">Thank You</p>
+  <h1>Survey submitted successfully</h1>
+  <p>Voucher info has been sent to your email: <strong>{{ email }}</strong></p>
+
+  @if (voucher) {
+    <p>Your voucher code: <strong>{{ voucher }}</strong></p>
+  }
+
+  <a routerLink="/">Back to landing page</a>
+</section>
