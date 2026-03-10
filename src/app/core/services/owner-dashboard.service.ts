@@ -35,6 +35,49 @@ export class OwnerDashboardService {
     });
   }
 
+  createTopupCheckout(payload: {
+    amount_coin: number;
+    payer_email?: string;
+    description?: string;
+    success_redirect_url?: string;
+    failure_redirect_url?: string;
+  }): Observable<{
+    success: boolean;
+    message: string;
+    data?: {
+      payment_order_id: number;
+      order_code: string;
+      provider_reference: string | null;
+      checkout_url: string | null;
+      status: string;
+      amount_coin: number;
+      currency: string;
+      expires_at: string | null;
+    };
+  }> {
+    return this.http.post<{
+      success: boolean;
+      message: string;
+      data?: {
+        payment_order_id: number;
+        order_code: string;
+        provider_reference: string | null;
+        checkout_url: string | null;
+        status: string;
+        amount_coin: number;
+        currency: string;
+        expires_at: string | null;
+      };
+    }>(`${this.baseUrl}/user/wallet/topup/checkout`, payload);
+  }
+
+  reconcileTopup(orderCode: string): Observable<{ success: boolean; message: string; data?: { order_code: string; status: string } }> {
+    return this.http.post<{ success: boolean; message: string; data?: { order_code: string; status: string } }>(
+      `${this.baseUrl}/user/wallet/topup/reconcile`,
+      { order_code: orderCode }
+    );
+  }
+
   getSurveys(): Observable<ApiResponse<OwnerSurvey[]>> {
     return this.http.get<ApiResponse<OwnerSurvey[]>>(`${this.baseUrl}/user/surveys`);
   }
@@ -63,4 +106,3 @@ export class OwnerDashboardService {
     );
   }
 }
-

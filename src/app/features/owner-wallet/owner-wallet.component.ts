@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, finalize, forkJoin, of, timeout } from 'rxjs';
 
 import { OwnerDashboardService } from '../../core/services/owner-dashboard.service';
@@ -18,6 +19,9 @@ export class OwnerWalletComponent implements OnInit {
 
   loading = true;
   toppingUp = false;
+  topupError = '';
+  paymentBanner = '';
+  paymentBannerType: 'success' | 'error' | '' = '';
   balanceCoin = 0;
   surveyAccessStatus = 'active';
   transactions: OwnerWalletTransaction[] = [];
@@ -28,10 +32,13 @@ export class OwnerWalletComponent implements OnInit {
   });
 
   constructor(
-    private readonly dashboardService: OwnerDashboardService
+    private readonly dashboardService: OwnerDashboardService,
+    private readonly route: ActivatedRoute,
+    private readonly router: Router
   ) {}
 
   ngOnInit(): void {
+    this.handlePostPaymentState();
     this.refresh();
   }
 
@@ -76,22 +83,101 @@ export class OwnerWalletComponent implements OnInit {
   }
 
   topup(): void {
+    this.topupError = '';
+
     if (this.topupForm.invalid || this.toppingUp) {
       this.topupForm.markAllAsTouched();
       return;
     }
 
     this.toppingUp = true;
+    const amountCoin = this.topupForm.controls.amount_coin.value;
+    const notes = this.topupForm.controls.notes.value ?? undefined;
+    const successRedirectUrl = typeof window !== 'undefined' ? `${window.location.origin}/owner/wallet?payment=success` : undefined;
+    const failureRedirectUrl = typeof window !== 'undefined' ? `${window.location.origin}/owner/wallet?payment=failed` : undefined;
+
     this.dashboardService
-      .topup(this.topupForm.controls.amount_coin.value, this.topupForm.controls.notes.value ?? undefined)
+      .createTopupCheckout({
+        amount_coin: amountCoin,
+        description: notes,
+        success_redirect_url: successRedirectUrl,
+        failure_redirect_url: failureRedirectUrl,
+      })
       .subscribe({
-        next: () => {
+        next: (response) => {
           this.toppingUp = false;
-          this.refresh();
+
+          const checkoutUrl = response.data?.checkout_url ?? '';
+          const orderCode = response.data?.order_code ?? '';
+          if (!checkoutUrl) {
+            this.topupError = 'Checkout URL is not available from payment provider.';
+            return;
+          }
+
+          if (typeof window !== 'undefined' && orderCode) {
+            localStorage.setItem('pending_topup_order_code', orderCode);
+          }
+
+          if (typeof window !== 'undefined') {
+            window.location.href = checkoutUrl;
+          }
         },
         error: () => {
           this.toppingUp = false;
+          this.topupError = 'Unable to create top-up checkout. Please try again.';
         }
       });
+  }
+
+  private handlePostPaymentState(): void {
+    const paymentState = this.route.snapshot.queryParamMap.get('payment') ?? '';
+    const orderCodeFromQuery = this.route.snapshot.queryParamMap.get('order_code') ?? '';
+    const orderCodeFromStorage =
+      typeof window !== 'undefined' ? localStorage.getItem('pending_topup_order_code') ?? '' : '';
+    const orderCode = orderCodeFromQuery || orderCodeFromStorage;
+
+    if (paymentState === 'failed') {
+      this.paymentBanner = 'Payment was not completed. Please try again.';
+      this.paymentBannerType = 'error';
+      this.clearPaymentQueryParams();
+      return;
+    }
+
+    if (paymentState !== 'success') {
+      return;
+    }
+
+    if (!orderCode) {
+      this.paymentBanner = 'Payment return detected, but order code is missing.';
+      this.paymentBannerType = 'error';
+      this.clearPaymentQueryParams();
+      return;
+    }
+
+    this.dashboardService.reconcileTopup(orderCode).subscribe({
+      next: (response) => {
+        this.paymentBanner = response.message || 'Payment confirmed.';
+        this.paymentBannerType = 'success';
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('pending_topup_order_code');
+        }
+        this.refresh();
+        this.clearPaymentQueryParams();
+      },
+      error: () => {
+        this.paymentBanner = 'Payment return detected, but confirmation is still pending. Please refresh in a moment.';
+        this.paymentBannerType = 'error';
+        this.clearPaymentQueryParams();
+      }
+    });
+  }
+
+  private clearPaymentQueryParams(): void {
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { payment: null, order_code: null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
   }
 }

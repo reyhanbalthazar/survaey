@@ -1,6 +1,12 @@
 <section class="panel">
   <h1>Wallet</h1>
 
+  @if (paymentBanner) {
+    <p class="banner" [class.success-banner]="paymentBannerType === 'success'" [class.error-banner]="paymentBannerType === 'error'">
+      {{ paymentBanner }}
+    </p>
+  }
+
   @if (loading) {
     <p>Loading wallet...</p>
   } @else {
@@ -23,6 +29,10 @@
       <button type="submit" [disabled]="toppingUp || topupForm.invalid">
         {{ toppingUp ? 'Processing...' : 'Topup' }}
       </button>
+
+      @if (topupError) {
+        <p class="error">{{ topupError }}</p>
+      }
     </form>
 
     <h3>Transactions</h3>
@@ -54,4 +64,3 @@
     </table>
   }
 </section>
-
