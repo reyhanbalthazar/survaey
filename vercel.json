@@ -5,7 +5,7 @@
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "/index.html"
+      "destination": "/index.csr.html"
     }
   ],
   "routes": [
@@ -14,7 +14,7 @@
     },
     {
       "src": "/.*",
-      "dest": "/index.html"
+      "dest": "/index.csr.html"
     }
   ]
 }
