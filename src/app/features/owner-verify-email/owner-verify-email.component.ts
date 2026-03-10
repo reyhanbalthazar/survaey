@@ -15,7 +15,7 @@ export class OwnerVerifyEmailComponent implements OnInit, OnDestroy {
   verifying = true;
   verifySuccess = false;
   countdown = 5;
-  statusMessage = 'Memverifikasi email...';
+  statusMessage = 'Verifying email...';
   private timerId: ReturnType<typeof setInterval> | null = null;
 
   constructor(
@@ -30,7 +30,7 @@ export class OwnerVerifyEmailComponent implements OnInit, OnDestroy {
     if (!token) {
       this.verifying = false;
       this.verifySuccess = false;
-      this.statusMessage = 'Token verifikasi tidak ditemukan pada URL.';
+      this.statusMessage = 'Verification token was not found in the URL.';
       return;
     }
 
@@ -38,13 +38,13 @@ export class OwnerVerifyEmailComponent implements OnInit, OnDestroy {
       next: (response) => {
         this.verifying = false;
         this.verifySuccess = true;
-        this.statusMessage = response.message || 'Verifikasi berhasil.';
+        this.statusMessage = response.message || 'Verification successful.';
         this.startCountdownRedirect();
       },
       error: () => {
         this.verifying = false;
         this.verifySuccess = false;
-        this.statusMessage = 'Verifikasi gagal. Token tidak valid atau sudah kedaluwarsa.';
+        this.statusMessage = 'Verification failed. Token is invalid or has expired.';
       }
     });
   }

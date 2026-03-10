@@ -107,7 +107,7 @@ export class OwnerDashboardComponent implements OnInit {
     }
 
     if (typeof navigator === 'undefined' || !navigator.clipboard) {
-      this.copyError = 'Clipboard tidak tersedia di browser ini.';
+      this.copyError = 'Clipboard is not available in this browser.';
       return;
     }
 
@@ -120,7 +120,7 @@ export class OwnerDashboardComponent implements OnInit {
         }, 1200);
       })
       .catch(() => {
-        this.copyError = 'Gagal copy link.';
+        this.copyError = 'Failed to copy link.';
       });
   }
 }
