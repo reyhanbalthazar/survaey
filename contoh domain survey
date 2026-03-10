@@ -1,1 +1,433 @@
-https://<domain-frontend>/survey/{slug}/{surveyCode}
+Final public URL:
+https://<domain-frontend>/survey/{publicToken}
+
+==================================================
+SQL Migration Draft (MySQL 8+)
+==================================================
+
+-- 1) users
+CREATE TABLE users (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(150) NOT NULL,
+  email VARCHAR(190) NOT NULL UNIQUE,
+  password_hash VARCHAR(255) NOT NULL,
+  email_verified_at DATETIME NULL,
+  survey_access_status ENUM('active','blocked_insufficient_coin') NOT NULL DEFAULT 'active',
+  survey_access_blocked_at DATETIME NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- 2) user_email_verifications
+CREATE TABLE user_email_verifications (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id BIGINT UNSIGNED NOT NULL,
+  token_hash VARCHAR(255) NOT NULL UNIQUE,
+  expires_at DATETIME NOT NULL,
+  used_at DATETIME NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_uemail_user FOREIGN KEY (user_id) REFERENCES users(id)
+) ENGINE=InnoDB;
+
+-- 3) user_wallets
+CREATE TABLE user_wallets (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id BIGINT UNSIGNED NOT NULL UNIQUE,
+  balance_coin BIGINT NOT NULL DEFAULT 0,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT chk_wallet_balance_nonnegative CHECK (balance_coin >= 0),
+  CONSTRAINT fk_wallet_user FOREIGN KEY (user_id) REFERENCES users(id)
+) ENGINE=InnoDB;
+
+-- 4) wallet_transactions
+CREATE TABLE wallet_transactions (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id BIGINT UNSIGNED NOT NULL,
+  direction ENUM('debit','credit') NOT NULL,
+  amount_coin BIGINT NOT NULL,
+  reason ENUM('topup','publish_fee','response_fee','refund','adjustment') NOT NULL,
+  reference_type VARCHAR(100) NULL,
+  reference_id BIGINT UNSIGNED NULL,
+  balance_before BIGINT NOT NULL,
+  balance_after BIGINT NOT NULL,
+  status ENUM('success','failed') NOT NULL,
+  failure_code VARCHAR(80) NULL,
+  notes VARCHAR(255) NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT chk_wt_amount_positive CHECK (amount_coin > 0),
+  CONSTRAINT chk_wt_balance_nonnegative CHECK (balance_after >= 0),
+  CONSTRAINT fk_wt_user FOREIGN KEY (user_id) REFERENCES users(id),
+  INDEX idx_wt_user_created (user_id, created_at)
+) ENGINE=InnoDB;
+
+-- 5) surveys
+CREATE TABLE surveys (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id BIGINT UNSIGNED NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  description TEXT NULL,
+  status ENUM('draft','published','closed','expired','suspended') NOT NULL DEFAULT 'draft',
+  public_token VARCHAR(120) NULL UNIQUE,
+  published_at DATETIME NULL,
+  expires_at DATETIME NULL,
+  max_responses INT UNSIGNED NOT NULL DEFAULT 1,
+  response_count INT UNSIGNED NOT NULL DEFAULT 0,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT chk_surveys_max_responses_positive CHECK (max_responses > 0),
+  CONSTRAINT fk_surveys_user FOREIGN KEY (user_id) REFERENCES users(id),
+  INDEX idx_surveys_user_status (user_id, status),
+  INDEX idx_surveys_public_token (public_token)
+) ENGINE=InnoDB;
+
+-- 6) survey_questions
+CREATE TABLE survey_questions (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  survey_id BIGINT UNSIGNED NOT NULL,
+  question_text TEXT NOT NULL,
+  question_type ENUM('single_choice','multiple_choice','text') NOT NULL,
+  is_required TINYINT(1) NOT NULL DEFAULT 1,
+  sort_order INT NOT NULL DEFAULT 1,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_sq_survey FOREIGN KEY (survey_id) REFERENCES surveys(id) ON DELETE CASCADE,
+  INDEX idx_sq_survey_sort (survey_id, sort_order)
+) ENGINE=InnoDB;
+
+-- 7) survey_options
+CREATE TABLE survey_options (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  question_id BIGINT UNSIGNED NOT NULL,
+  option_text VARCHAR(500) NOT NULL,
+  sort_order INT NOT NULL DEFAULT 1,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_so_question FOREIGN KEY (question_id) REFERENCES survey_questions(id) ON DELETE CASCADE,
+  INDEX idx_so_question_sort (question_id, sort_order)
+) ENGINE=InnoDB;
+
+-- 8) survey_responses
+CREATE TABLE survey_responses (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  survey_id BIGINT UNSIGNED NOT NULL,
+  respondent_email VARCHAR(190) NOT NULL,
+  status ENUM('in_progress','submitted','invalid') NOT NULL DEFAULT 'submitted',
+  submitted_at DATETIME NULL,
+  submit_ip VARCHAR(64) NULL,
+  submit_user_agent VARCHAR(255) NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_sr_survey FOREIGN KEY (survey_id) REFERENCES surveys(id) ON DELETE CASCADE,
+  INDEX idx_sr_survey_submitted (survey_id, submitted_at)
+) ENGINE=InnoDB;
+
+-- 9) survey_response_answers
+CREATE TABLE survey_response_answers (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  response_id BIGINT UNSIGNED NOT NULL,
+  question_id BIGINT UNSIGNED NOT NULL,
+  option_id BIGINT UNSIGNED NULL,
+  answer_text TEXT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_sra_response FOREIGN KEY (response_id) REFERENCES survey_responses(id) ON DELETE CASCADE,
+  CONSTRAINT fk_sra_question FOREIGN KEY (question_id) REFERENCES survey_questions(id),
+  CONSTRAINT fk_sra_option FOREIGN KEY (option_id) REFERENCES survey_options(id),
+  INDEX idx_sra_response (response_id),
+  INDEX idx_sra_question (question_id)
+) ENGINE=InnoDB;
+
+-- 10) response_email_deliveries
+CREATE TABLE response_email_deliveries (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  response_id BIGINT UNSIGNED NOT NULL UNIQUE,
+  status ENUM('pending','sent','failed') NOT NULL DEFAULT 'pending',
+  provider_message_id VARCHAR(190) NULL,
+  sent_at DATETIME NULL,
+  error_message TEXT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_red_response FOREIGN KEY (response_id) REFERENCES survey_responses(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+==================================================
+Business Rule Notes (Atomic Flow)
+==================================================
+
+1) Publish survey (fee 100 coin)
+- DB transaction
+- lock wallet row: SELECT ... FOR UPDATE
+- validate balance >= 100
+- insert wallet_transactions (debit, publish_fee, success)
+- update user_wallets.balance_coin
+- update surveys: status=published, public_token generated, published_at set
+
+2) Respondent submit (fee 1 coin only after email sent)
+- save survey_responses + survey_response_answers
+- send email to respondent
+- if email status=sent:
+  - DB transaction + lock wallet row
+  - try debit 1 coin (response_fee)
+  - if debit fail (insufficient):
+    - insert wallet_transactions status=failed
+    - set users.survey_access_status='blocked_insufficient_coin'
+    - set users.survey_access_blocked_at=NOW()
+- public survey access guard must reject all surveys where owner status != active
+
+3) Public access eligibility
+- owner.survey_access_status = active
+- survey.status = published
+- NOW() <= surveys.expires_at
+- surveys.response_count < surveys.max_responses
+
+==================================================
+API Endpoint Draft
+==================================================
+
+Auth
+- POST /api/auth/register
+- POST /api/auth/verify-email
+- POST /api/auth/login
+
+Wallet
+- GET /api/wallet
+- GET /api/wallet/transactions
+- POST /api/wallet/topup (optional, admin/payment callback)
+
+Survey Owner
+- POST /api/surveys (create draft)
+- GET /api/surveys
+- GET /api/surveys/{id}
+- PUT /api/surveys/{id}
+- POST /api/surveys/{id}/publish
+- POST /api/surveys/{id}/close
+- GET /api/surveys/{id}/responses
+- GET /api/surveys/{id}/responses/{responseId}
+
+Questions & Options
+- POST /api/surveys/{id}/questions
+- PUT /api/questions/{questionId}
+- DELETE /api/questions/{questionId}
+- POST /api/questions/{questionId}/options
+- PUT /api/options/{optionId}
+- DELETE /api/options/{optionId}
+
+Public Respondent
+- GET /api/public/surveys/{publicToken}
+- POST /api/public/surveys/{publicToken}/submit
+
+Admin/System (optional)
+- POST /api/internal/response-email-deliveries/{responseId}/mark-sent
+- POST /api/internal/users/{userId}/unblock-survey-access
+
+==================================================
+Payload Request/Response Examples (Endpoint Baru)
+==================================================
+
+Auth
+
+POST /api/user-auth/register
+Request:
+{
+  "name": "Survey Owner Demo",
+  "email": "owner.demo@survey.test",
+  "password": "password123"
+}
+Response 201:
+{
+  "success": true,
+  "message": "Registrasi berhasil. Silakan cek email untuk verifikasi."
+}
+
+POST /api/user-auth/verify-email
+Request:
+{
+  "token": "plain_verification_token_from_email"
+}
+Response 200:
+{
+  "success": true,
+  "message": "Email berhasil diverifikasi."
+}
+
+POST /api/user-auth/login
+Request:
+{
+  "email": "owner.demo@survey.test",
+  "password": "password123"
+}
+Response 200:
+{
+  "success": true,
+  "token": "1|sanctum_access_token",
+  "user": {
+    "id": 1,
+    "name": "Survey Owner Demo",
+    "email": "owner.demo@survey.test",
+    "survey_access_status": "active"
+  }
+}
+
+Wallet
+
+GET /api/user/wallet
+Header:
+Authorization: Bearer {token}
+Response 200:
+{
+  "success": true,
+  "data": {
+    "balance_coin": 500,
+    "survey_access_status": "active"
+  }
+}
+
+POST /api/user/wallet/topup
+Header:
+Authorization: Bearer {token}
+Request:
+{
+  "amount_coin": 200,
+  "notes": "manual topup for testing"
+}
+Response 200:
+{
+  "success": true,
+  "message": "Topup berhasil.",
+  "balance_coin": 700
+}
+
+User Survey (Owner)
+
+POST /api/user/surveys
+Header:
+Authorization: Bearer {token}
+Request:
+{
+  "title": "Customer Experience March 2026",
+  "description": "Monthly feedback survey",
+  "expires_at": "2026-04-30 23:59:59",
+  "max_responses": 300,
+  "questions": [
+    {
+      "question_text": "How satisfied are you with our service?",
+      "question_type": "single_choice",
+      "is_required": true,
+      "sort_order": 1,
+      "options": [
+        { "option_text": "Very satisfied", "sort_order": 1 },
+        { "option_text": "Satisfied", "sort_order": 2 },
+        { "option_text": "Neutral", "sort_order": 3 },
+        { "option_text": "Not satisfied", "sort_order": 4 }
+      ]
+    },
+    {
+      "question_text": "What should we improve?",
+      "question_type": "text",
+      "is_required": false,
+      "sort_order": 2
+    }
+  ]
+}
+Response 201:
+{
+  "success": true,
+  "message": "Draft survey berhasil dibuat.",
+  "data": {
+    "id": 11,
+    "status": "draft",
+    "title": "Customer Experience March 2026"
+  }
+}
+
+POST /api/user/surveys/{id}/publish
+Header:
+Authorization: Bearer {token}
+Response 200:
+{
+  "success": true,
+  "message": "Survey berhasil dipublish.",
+  "data": {
+    "id": 11,
+    "status": "published",
+    "public_token": "generated_public_token_40_chars"
+  }
+}
+
+GET /api/user/surveys/{id}/responses
+Header:
+Authorization: Bearer {token}
+Response 200:
+{
+  "success": true,
+  "data": [
+    {
+      "id": 88,
+      "respondent_email": "respondent@demo.com",
+      "status": "submitted",
+      "submitted_at": "2026-03-10T08:30:00.000000Z"
+    }
+  ]
+}
+
+Public Respondent
+
+GET /api/public-surveys/{publicToken}
+Response 200:
+{
+  "success": true,
+  "data": {
+    "id": 11,
+    "title": "Customer Experience March 2026",
+    "status": "published",
+    "questions": [
+      {
+        "id": 1,
+        "question_text": "How satisfied are you with our service?",
+        "question_type": "single_choice",
+        "is_required": true,
+        "options": [
+          { "id": 10, "option_text": "Very satisfied" },
+          { "id": 11, "option_text": "Satisfied" }
+        ]
+      }
+    ]
+  }
+}
+
+POST /api/public-surveys/{publicToken}/submit
+Request:
+{
+  "respondent_email": "respondent@demo.com",
+  "answers": [
+    {
+      "question_id": 1,
+      "option_id": 10
+    },
+    {
+      "question_id": 2,
+      "answer_text": "Speed up delivery"
+    },
+    {
+      "question_id": 3,
+      "option_ids": [21, 22]
+    }
+  ]
+}
+Response 200 (email sent + coin charged):
+{
+  "success": true,
+  "message": "Jawaban tersimpan, email konfirmasi terkirim, dan coin owner terpotong 1."
+}
+
+Response 200 (email failed, no coin debit):
+{
+  "success": true,
+  "message": "Jawaban tersimpan, tetapi email konfirmasi gagal dikirim. Coin owner tidak dipotong."
+}
+
+Response 200 (email sent but owner blocked due to insufficient coin):
+{
+  "success": true,
+  "message": "Jawaban tersimpan dan email berhasil dikirim, tetapi owner survey diblokir karena saldo coin tidak cukup."
+}

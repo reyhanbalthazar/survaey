@@ -1,0 +1,15 @@
+<section class="check-page">
+  <div class="card">
+    <h1>Check Your Email</h1>
+    <p>
+      Registrasi berhasil.
+      @if (email) {
+        Kami telah mengirim link verifikasi ke <strong>{{ email }}</strong>.
+      } @else {
+        Kami telah mengirim link verifikasi ke email kamu.
+      }
+    </p>
+    <p>Silakan buka email dan klik link verifikasi untuk melanjutkan.</p>
+  </div>
+</section>
+

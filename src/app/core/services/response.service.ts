@@ -12,7 +12,7 @@ export class ResponseService {
 
   constructor(private readonly http: HttpClient) {}
 
-  submitSurvey(payload: SubmitSurveyPayload): Observable<ApiResponse<unknown>> {
-    return this.http.post<ApiResponse<unknown>>(`${this.baseUrl}/submit-survey`, payload);
+  submitSurvey(publicToken: string, payload: SubmitSurveyPayload): Observable<ApiResponse<unknown>> {
+    return this.http.post<ApiResponse<unknown>>(`${this.baseUrl}/public-surveys/${publicToken}/submit`, payload);
   }
 }

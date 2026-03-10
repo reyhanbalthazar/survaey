@@ -1,0 +1,19 @@
+<section class="owner-shell">
+  <aside class="sidebar">
+    <h2>Owner Panel</h2>
+    <p class="user">{{ userName }}</p>
+
+    <nav>
+      <a routerLink="/owner/dashboard" routerLinkActive="active">Dashboard</a>
+      <a routerLink="/owner/surveys/new" routerLinkActive="active">Create Draft</a>
+      <a routerLink="/owner/wallet" routerLinkActive="active">Wallet</a>
+    </nav>
+
+    <button type="button" (click)="logout()">Logout</button>
+  </aside>
+
+  <main class="content">
+    <router-outlet></router-outlet>
+  </main>
+</section>
+

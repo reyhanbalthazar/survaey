@@ -1,0 +1,57 @@
+<section class="panel">
+  <h1>Wallet</h1>
+
+  @if (loading) {
+    <p>Loading wallet...</p>
+  } @else {
+    <article class="balance">
+      <h3>Balance</h3>
+      <p>{{ balanceCoin }} coin</p>
+      <small>Status: {{ surveyAccessStatus }}</small>
+    </article>
+
+    <form [formGroup]="topupForm" (ngSubmit)="topup()" class="topup">
+      <h3>Topup (Dev)</h3>
+      <label>
+        Amount Coin
+        <input type="number" min="1" formControlName="amount_coin" />
+      </label>
+      <label>
+        Notes
+        <input type="text" formControlName="notes" />
+      </label>
+      <button type="submit" [disabled]="toppingUp || topupForm.invalid">
+        {{ toppingUp ? 'Processing...' : 'Topup' }}
+      </button>
+    </form>
+
+    <h3>Transactions</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Direction</th>
+          <th>Amount</th>
+          <th>Reason</th>
+          <th>Status</th>
+          <th>Before</th>
+          <th>After</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of transactions; track item.id) {
+          <tr>
+            <td>{{ item.id }}</td>
+            <td>{{ item.direction }}</td>
+            <td>{{ item.amount_coin }}</td>
+            <td>{{ item.reason }}</td>
+            <td>{{ item.status }}</td>
+            <td>{{ item.balance_before }}</td>
+            <td>{{ item.balance_after }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</section>
+

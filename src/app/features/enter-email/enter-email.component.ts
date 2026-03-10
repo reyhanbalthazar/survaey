@@ -17,11 +17,9 @@ import { SurveyDetail } from '../../models/survey.model';
 export class EnterEmailComponent implements OnInit {
   readonly form;
 
-  slug = '';
-  surveyCode = '';
+  publicToken = '';
   survey: SurveyDetail | null = null;
   loading = true;
-  checking = false;
   localError = '';
 
   constructor(
@@ -37,10 +35,9 @@ export class EnterEmailComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.slug = this.route.snapshot.paramMap.get('slug') ?? '';
-    this.surveyCode = this.route.snapshot.paramMap.get('surveyCode') ?? '';
+    this.publicToken = this.route.snapshot.paramMap.get('publicToken') ?? '';
 
-    this.surveyService.getSurvey(this.slug, this.surveyCode).subscribe({
+    this.surveyService.getPublicSurvey(this.publicToken).subscribe({
       next: (response) => {
         this.survey = response.data ?? null;
         this.loading = false;
@@ -55,7 +52,7 @@ export class EnterEmailComponent implements OnInit {
     this.localError = '';
     this.errorState.clear();
 
-    if (this.form.invalid || this.checking) {
+    if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
@@ -65,25 +62,9 @@ export class EnterEmailComponent implements OnInit {
       return;
     }
 
-    this.checking = true;
-
-    this.surveyService.checkEmailUnique(this.survey.id, this.form.value.email ?? '').subscribe({
-      next: (response) => {
-        this.checking = false;
-
-        if (!response.success) {
-          this.localError = response.message ?? 'Email has already submitted this survey.';
-          return;
-        }
-
-        void this.router.navigate(['/survey', this.slug, this.surveyCode, 'form'], {
-          queryParams: {
-            email: this.form.value.email
-          }
-        });
-      },
-      error: () => {
-        this.checking = false;
+    void this.router.navigate(['/survey', this.publicToken, 'form'], {
+      queryParams: {
+        email: this.form.value.email
       }
     });
   }

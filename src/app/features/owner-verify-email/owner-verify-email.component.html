@@ -1,0 +1,15 @@
+<section class="verify-page">
+  <div class="card">
+    @if (verifying) {
+      <h1>Verifying...</h1>
+      <p>{{ statusMessage }}</p>
+    } @else if (verifySuccess) {
+      <h1>Verification Success</h1>
+      <p>{{ statusMessage }}</p>
+      <p>Redirecting to login in {{ countdown }} second(s)...</p>
+    } @else {
+      <h1>Verification Failed</h1>
+      <p>{{ statusMessage }}</p>
+    }
+  </div>
+</section>

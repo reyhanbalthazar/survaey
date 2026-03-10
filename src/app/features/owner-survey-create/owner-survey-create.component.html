@@ -1,0 +1,85 @@
+<section class="panel">
+  <h1>Create Draft Survey</h1>
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <div class="grid">
+      <label>
+        Title
+        <input type="text" formControlName="title" />
+      </label>
+
+      <label>
+        Expires At
+        <input type="datetime-local" formControlName="expires_at" />
+      </label>
+
+      <label>
+        Max Responses
+        <input type="number" formControlName="max_responses" min="1" />
+      </label>
+    </div>
+
+    <label>
+      Description
+      <textarea rows="3" formControlName="description"></textarea>
+    </label>
+
+    <div class="question-header">
+      <h2>Questions</h2>
+      <button type="button" (click)="addQuestion()">+ Add Question</button>
+    </div>
+
+    <div formArrayName="questions" class="questions">
+      @for (question of questions.controls; track $index; let qIndex = $index) {
+        <article [formGroupName]="qIndex">
+          <div class="question-top">
+            <h3>Question {{ qIndex + 1 }}</h3>
+            <button type="button" (click)="removeQuestion(qIndex)">Remove</button>
+          </div>
+
+          <label>
+            Question Text
+            <input type="text" formControlName="question_text" />
+          </label>
+
+          <div class="inline">
+            <label>
+              Type
+              <select formControlName="question_type" (change)="onTypeChange(qIndex)">
+                <option value="text">Text</option>
+                <option value="single_choice">Single Choice</option>
+                <option value="multiple_choice">Multiple Choice</option>
+              </select>
+            </label>
+
+            <label class="required-box">
+              <input type="checkbox" formControlName="is_required" />
+              Required
+            </label>
+          </div>
+
+          @if (question.get('question_type')?.value !== 'text') {
+            <div class="options-wrap">
+              <div class="question-header">
+                <strong>Options</strong>
+                <button type="button" (click)="addOption(qIndex)">+ Add Option</button>
+              </div>
+              <div formArrayName="options" class="options-list">
+                @for (option of optionsAt(qIndex).controls; track $index; let optIndex = $index) {
+                  <div [formGroupName]="optIndex" class="option-row">
+                    <input type="text" formControlName="option_text" placeholder="Option text" />
+                    <button type="button" (click)="removeOption(qIndex, optIndex)">x</button>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </article>
+      }
+    </div>
+
+    <button type="submit" [disabled]="saving || form.invalid">
+      {{ saving ? 'Saving...' : 'Save Draft' }}
+    </button>
+  </form>
+</section>

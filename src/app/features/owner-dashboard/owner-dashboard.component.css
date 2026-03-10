@@ -1,0 +1,107 @@
+.panel {
+  display: grid;
+  gap: 16px;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+header a {
+  text-decoration: none;
+  background: #0f172a;
+  color: #fff;
+  padding: 9px 12px;
+  border-radius: 8px;
+}
+
+.cards {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.cards article {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.cards h3 {
+  margin: 0;
+  font-size: 14px;
+  color: #475569;
+}
+
+.cards p {
+  margin: 8px 0 0;
+  font-weight: 700;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 12px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 14px;
+}
+
+.link {
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+button {
+  border: 0;
+  border-radius: 7px;
+  background: #334155;
+  color: #fff;
+  padding: 7px 10px;
+  cursor: pointer;
+}
+
+.link-cell {
+  min-width: 280px;
+}
+
+.copy-btn {
+  margin-top: 6px;
+  background: #0f172a;
+  font-size: 12px;
+  padding: 5px 9px;
+}
+
+.copy-error {
+  margin: 0;
+  color: #b91c1c;
+  font-size: 13px;
+}
+
+a {
+  color: #0f172a;
+}
+
+@media (max-width: 900px) {
+  .cards {
+    grid-template-columns: 1fr;
+  }
+
+  table {
+    display: block;
+    overflow-x: auto;
+  }
+}

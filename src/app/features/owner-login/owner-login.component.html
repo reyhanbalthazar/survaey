@@ -1,0 +1,20 @@
+<section class="login-page">
+  <div class="card">
+    <h1>Owner Login</h1>
+    <p>Masuk untuk mengelola survey, coin, dan response.</p>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <label for="email">Email</label>
+      <input id="email" type="email" formControlName="email" placeholder="owner@email.com" />
+
+      <label for="password">Password</label>
+      <input id="password" type="password" formControlName="password" placeholder="********" />
+
+      <button type="submit" [disabled]="loading || form.invalid">
+        {{ loading ? 'Signing in...' : 'Sign In' }}
+      </button>
+    </form>
+
+    <small>Belum punya akun? <a routerLink="/owner/register">Register</a></small>
+  </div>
+</section>

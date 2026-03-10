@@ -1,0 +1,61 @@
+<section class="panel">
+  <h1>Survey Responses</h1>
+
+  @if (loading) {
+    <p>Loading responses...</p>
+  } @else {
+    <form class="filter" [formGroup]="filterForm">
+      <input type="text" formControlName="search" placeholder="Search by respondent email" (input)="applyFilter()" />
+      <select formControlName="status" (change)="applyFilter()">
+        <option value="all">All status</option>
+        <option value="submitted">Submitted</option>
+        <option value="invalid">Invalid</option>
+      </select>
+      <small>{{ filteredResponses.length }} response(s)</small>
+    </form>
+
+    <div class="layout">
+      <article class="list">
+        <h3>Responses</h3>
+        @if (pagedResponses.length === 0) {
+          <p>No response yet.</p>
+        } @else {
+          @for (item of pagedResponses; track item.id) {
+            <button type="button" (click)="viewResponse(item.id)">
+              <strong>#{{ item.id }}</strong>
+              <span>{{ item.respondent_email }}</span>
+              <small>{{ item.submitted_at ?? '-' }}</small>
+            </button>
+          }
+
+          <div class="pagination">
+            <button type="button" (click)="prevPage()" [disabled]="page <= 1">Prev</button>
+            <span>Page {{ page }} / {{ totalPages }}</span>
+            <button type="button" (click)="nextPage()" [disabled]="page >= totalPages">Next</button>
+          </div>
+        }
+      </article>
+
+      <article class="detail">
+        <h3>Detail</h3>
+        @if (!selectedResponse) {
+          <p>Select one response to see detail.</p>
+        } @else {
+          <p><strong>Email:</strong> {{ selectedResponse.respondent_email }}</p>
+          <p><strong>Submitted:</strong> {{ selectedResponse.submitted_at }}</p>
+          <p><strong>Status:</strong> {{ selectedResponse.status }}</p>
+
+          <hr />
+
+          @for (answer of selectedResponse.answers; track answer.id) {
+            <div class="answer">
+              <p>Question ID: {{ answer.user_survey_question_id }}</p>
+              <p>Option ID: {{ answer.user_survey_option_id ?? '-' }}</p>
+              <p>Text: {{ answer.answer_text ?? '-' }}</p>
+            </div>
+          }
+        }
+      </article>
+    </div>
+  }
+</section>

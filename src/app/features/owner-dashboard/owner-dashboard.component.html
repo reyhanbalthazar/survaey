@@ -1,0 +1,68 @@
+<section class="panel">
+  <header>
+    <h1>Dashboard</h1>
+    <a routerLink="/owner/surveys/new">+ Create Draft Survey</a>
+  </header>
+
+  @if (loading) {
+    <p>Loading dashboard...</p>
+  } @else {
+    <div class="cards">
+      <article>
+        <h3>Coin Balance</h3>
+        <p>{{ balanceCoin }} coin</p>
+      </article>
+      <article>
+        <h3>Survey Access</h3>
+        <p>{{ surveyAccessStatus }}</p>
+      </article>
+      <article>
+        <h3>Total Survey</h3>
+        <p>{{ surveys.length }}</p>
+      </article>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Status</th>
+          <th>Responses</th>
+          <th>Public Link</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (survey of surveys; track survey.id) {
+          <tr>
+            <td>{{ survey.title }}</td>
+            <td>{{ survey.status }}</td>
+            <td>{{ survey.response_count }} / {{ survey.max_responses }}</td>
+            <td class="link-cell">
+              <div class="link">{{ getPublicLink(survey.public_token) }}</div>
+              @if (survey.public_token) {
+                <button type="button" class="copy-btn" (click)="copyPublicLink(survey)">
+                  {{ copiedSurveyId === survey.id ? 'Copied' : 'Copy Link' }}
+                </button>
+              }
+            </td>
+            <td>
+              @if (survey.status === 'draft') {
+                <button type="button" (click)="publishSurvey(survey)" [disabled]="publishingId === survey.id">
+                  {{ publishingId === survey.id ? 'Publishing...' : 'Publish (100 coin)' }}
+                </button>
+              }
+              @if (survey.status !== 'draft') {
+                <a [routerLink]="['/owner/surveys', survey.id, 'responses']">Review Responses</a>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    @if (copyError) {
+      <p class="copy-error">{{ copyError }}</p>
+    }
+  }
+</section>

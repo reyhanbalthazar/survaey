@@ -1,0 +1,35 @@
+<section class="register-page">
+  <div class="card">
+    <h1>Owner Register</h1>
+    <p>Buat akun baru untuk mengelola survey.</p>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <label for="name">Name</label>
+      <input id="name" type="text" formControlName="name" placeholder="Owner Name" />
+
+      <label for="email">Email</label>
+      <input id="email" type="email" formControlName="email" placeholder="owner@email.com" />
+
+      <label for="password">Password</label>
+      <input id="password" type="password" formControlName="password" placeholder="min 8 karakter" />
+
+      <label for="password_confirmation">Confirm Password</label>
+      <input
+        id="password_confirmation"
+        type="password"
+        formControlName="password_confirmation"
+        placeholder="ulangi password"
+      />
+
+      @if (passwordMismatch) {
+        <p class="error">Password dan konfirmasi password harus sama.</p>
+      }
+
+      <button type="submit" [disabled]="loading || form.invalid">
+        {{ loading ? 'Creating account...' : 'Register' }}
+      </button>
+    </form>
+
+    <small>Sudah punya akun? <a routerLink="/owner/login">Login</a></small>
+  </div>
+</section>

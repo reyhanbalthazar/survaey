@@ -1,6 +1,6 @@
 <section class="page">
   <h1>Enter Email</h1>
-  <p class="subtitle">Use one email for one survey submission only.</p>
+  <p class="subtitle">Email ini akan menerima konfirmasi setelah survey dikirim.</p>
 
   @if (loading) {
     <p>Loading survey...</p>
@@ -24,8 +24,8 @@
         <p class="error">{{ localError }}</p>
       }
 
-      <button type="submit" [disabled]="checking || form.invalid">
-        {{ checking ? 'Checking...' : 'Continue to Survey' }}
+      <button type="submit" [disabled]="form.invalid">
+        Continue to Survey
       </button>
     </form>
   }

@@ -1,0 +1,94 @@
+.panel {
+  display: grid;
+  gap: 12px;
+}
+
+.filter {
+  display: grid;
+  grid-template-columns: 1fr 180px auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.filter input,
+.filter select {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 9px 10px;
+}
+
+.filter small {
+  color: #475569;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 12px;
+}
+
+.list,
+.detail {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.list {
+  display: grid;
+  gap: 8px;
+}
+
+.list button {
+  text-align: left;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  padding: 10px;
+  display: grid;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.pagination button {
+  border: 0;
+  border-radius: 8px;
+  background: #334155;
+  color: #fff;
+  padding: 7px 10px;
+  cursor: pointer;
+}
+
+.pagination button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.answer {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px;
+  margin-bottom: 8px;
+}
+
+.answer p {
+  margin: 4px 0;
+}
+
+@media (max-width: 900px) {
+  .filter {
+    grid-template-columns: 1fr;
+  }
+
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}

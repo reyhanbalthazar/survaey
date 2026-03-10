@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
@@ -16,17 +16,23 @@ import { SubmitSurveyPayload } from '../../models/response.model';
   templateUrl: './survey.component.html',
   styleUrl: './survey.component.css'
 })
-export class SurveyComponent implements OnInit {
+export class SurveyComponent implements OnInit, OnDestroy {
   survey: SurveyDetail | null = null;
   email = '';
-  slug = '';
-  surveyCode = '';
+  publicToken = '';
 
   loadingSurvey = true;
   submitting = false;
   submitted = false;
 
   readonly form = new FormGroup({});
+  private readonly popStateHandler = () => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    window.history.pushState(null, '', window.location.href);
+  };
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -37,16 +43,17 @@ export class SurveyComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.slug = this.route.snapshot.paramMap.get('slug') ?? '';
-    this.surveyCode = this.route.snapshot.paramMap.get('surveyCode') ?? '';
+    this.lockBackNavigation();
+
+    this.publicToken = this.route.snapshot.paramMap.get('publicToken') ?? '';
     this.email = this.route.snapshot.queryParamMap.get('email') ?? '';
 
     if (!this.email) {
-      void this.router.navigate(['/survey', this.slug, this.surveyCode]);
+      void this.router.navigate(['/survey', this.publicToken]);
       return;
     }
 
-    this.surveyService.getSurvey(this.slug, this.surveyCode).subscribe({
+    this.surveyService.getPublicSurvey(this.publicToken).subscribe({
       next: (response) => {
         this.survey = response.data ?? null;
         this.buildForm();
@@ -58,28 +65,32 @@ export class SurveyComponent implements OnInit {
     });
   }
 
+  ngOnDestroy(): void {
+    this.unlockBackNavigation();
+  }
+
   controlFor(questionId: number): FormControl {
     return this.form.get(String(questionId)) as FormControl;
   }
 
-  toggleCheckbox(questionId: number, option: string): void {
+  toggleCheckbox(questionId: number, optionId: number): void {
     const control = this.controlFor(questionId);
-    const current = Array.isArray(control.value) ? [...control.value] : [];
-    const index = current.indexOf(option);
+    const current = Array.isArray(control.value) ? [...(control.value as number[])] : [];
+    const index = current.indexOf(optionId);
 
     if (index > -1) {
       current.splice(index, 1);
     } else {
-      current.push(option);
+      current.push(optionId);
     }
 
     control.setValue(current);
     control.markAsTouched();
   }
 
-  isChecked(questionId: number, option: string): boolean {
+  isChecked(questionId: number, optionId: number): boolean {
     const value = this.controlFor(questionId).value;
-    return Array.isArray(value) && value.includes(option);
+    return Array.isArray(value) && (value as number[]).includes(optionId);
   }
 
   get requiredQuestions(): Question[] {
@@ -104,33 +115,15 @@ export class SurveyComponent implements OnInit {
   }
 
   isTextType(question: Question): boolean {
-    return this.normalizeType(question.type) === 'text';
+    return this.normalizeType(question.question_type) === 'text';
   }
 
-  isTextareaType(question: Question): boolean {
-    return this.normalizeType(question.type) === 'textarea';
-  }
-
-  isRatingType(question: Question): boolean {
-    return this.normalizeType(question.type) === 'rating';
-  }
-
-  isCheckboxType(question: Question): boolean {
-    const type = this.normalizeType(question.type);
-    return type === 'checkbox' || type === 'multiple_select' || type === 'multi_select';
+  isMultipleChoiceType(question: Question): boolean {
+    return this.normalizeType(question.question_type) === 'multiple_choice';
   }
 
   isSingleChoiceType(question: Question): boolean {
-    const type = this.normalizeType(question.type);
-    if (['radio', 'multiple_choice', 'yes_no', 'single_choice'].includes(type)) {
-      return true;
-    }
-
-    if (this.isRatingType(question) || this.isCheckboxType(question)) {
-      return false;
-    }
-
-    return Array.isArray(question.options) && question.options.length > 0;
+    return this.normalizeType(question.question_type) === 'single_choice';
   }
 
   submit(): void {
@@ -141,26 +134,25 @@ export class SurveyComponent implements OnInit {
       return;
     }
 
+    const answers = this.survey.questions
+      .filter((question) => this.hasAnswer(question))
+      .map((question) => this.mapAnswer(question));
+
     const payload: SubmitSurveyPayload = {
-      survey_id: this.survey.id,
-      email: this.email,
-      answers: this.survey.questions.map((question) => ({
-        question_id: question.id,
-        answer: this.mapAnswer(question.id)
-      }))
+      respondent_email: this.email,
+      answers
     };
 
     this.submitting = true;
 
-    this.responseService.submitSurvey(payload).subscribe({
+    this.responseService.submitSurvey(this.publicToken, payload).subscribe({
       next: (response) => {
         this.submitting = false;
         this.submitted = true;
 
-        void this.router.navigate(['/survey', this.slug, this.surveyCode, 'done'], {
+        void this.router.navigate(['/survey', this.publicToken, 'done'], {
           queryParams: {
-            email: this.email,
-            voucher: response.voucher_code ?? ''
+            email: this.email
           }
         });
       },
@@ -173,7 +165,7 @@ export class SurveyComponent implements OnInit {
   private buildForm(): void {
     for (const question of this.survey?.questions ?? []) {
       const validators = this.getQuestionValidators(question);
-      const initialValue = this.isCheckboxType(question) ? [] : '';
+      const initialValue = this.isMultipleChoiceType(question) ? [] : '';
       this.form.addControl(String(question.id), new FormControl(initialValue, validators));
     }
   }
@@ -181,33 +173,8 @@ export class SurveyComponent implements OnInit {
   private getQuestionValidators(question: Question): ValidatorFn[] {
     const validators: ValidatorFn[] = [];
 
-    if (question.is_required !== false) {
-      validators.push(this.isCheckboxType(question) ? this.checkboxRequiredValidator() : Validators.required);
-    }
-
-    const rules = question.validation_rules;
-    if (!rules) {
-      return validators;
-    }
-
-    if (typeof rules['min'] === 'number') {
-      validators.push(Validators.min(rules['min']));
-    }
-
-    if (typeof rules['max'] === 'number') {
-      validators.push(Validators.max(rules['max']));
-    }
-
-    if (typeof rules['minLength'] === 'number') {
-      validators.push(Validators.minLength(rules['minLength']));
-    }
-
-    if (typeof rules['maxLength'] === 'number') {
-      validators.push(Validators.maxLength(rules['maxLength']));
-    }
-
-    if (typeof rules['pattern'] === 'string') {
-      validators.push(Validators.pattern(rules['pattern']));
+    if (question.is_required) {
+      validators.push(this.isMultipleChoiceType(question) ? this.checkboxRequiredValidator() : Validators.required);
     }
 
     return validators;
@@ -228,19 +195,50 @@ export class SurveyComponent implements OnInit {
     return String(value ?? '').trim().length > 0;
   }
 
-  private mapAnswer(questionId: number): string {
-    const value = this.controlFor(questionId).value;
+  private mapAnswer(question: Question): SubmitSurveyPayload['answers'][number] {
+    const value = this.controlFor(question.id).value;
+    const normalizedType = this.normalizeType(question.question_type);
 
-    if (Array.isArray(value)) {
-      return JSON.stringify(value);
+    if (normalizedType === 'single_choice') {
+      return {
+        question_id: question.id,
+        option_id: Number(value)
+      };
     }
 
-    return String(value ?? '');
+    if (normalizedType === 'multiple_choice') {
+      return {
+        question_id: question.id,
+        option_ids: Array.isArray(value) ? (value as number[]).map((v) => Number(v)) : []
+      };
+    }
+
+    return {
+      question_id: question.id,
+      answer_text: String(value ?? '')
+    };
   }
 
   private normalizeType(type: string | null | undefined): string {
     return String(type ?? '')
       .trim()
       .toLowerCase();
+  }
+
+  private lockBackNavigation(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    window.history.pushState(null, '', window.location.href);
+    window.addEventListener('popstate', this.popStateHandler);
+  }
+
+  private unlockBackNavigation(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    window.removeEventListener('popstate', this.popStateHandler);
   }
 }

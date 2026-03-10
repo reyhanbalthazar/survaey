@@ -9,6 +9,19 @@ export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
+      // During SSR/hydration there is no browser context; avoid showing transient global errors.
+      if (typeof window === 'undefined') {
+        return throwError(() => error);
+      }
+
+      // Suppress transient 401 flicker for protected owner APIs when request had no bearer token yet.
+      // Keep real auth errors visible when Authorization header was actually sent.
+      const isProtectedOwnerApi = req.url.includes('/api/user/');
+      const hasAuthHeader = req.headers.has('Authorization');
+      if (error.status === 401 && isProtectedOwnerApi && !hasAuthHeader) {
+        return throwError(() => error);
+      }
+
       const backendMessage =
         typeof error.error === 'object' && error.error?.message
           ? String(error.error.message)
