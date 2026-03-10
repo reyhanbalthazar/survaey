@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
   environmentName: 'production',
-  apiBaseUrl: 'https://api.example.com/api'
+  apiBaseUrl: 'https://reyhanbalthazarepsa.my.id/be-survey-app/api'
 };
