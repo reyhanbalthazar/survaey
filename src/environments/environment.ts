@@ -1,5 +1,5 @@
 export const environment = {
   production: false,
   environmentName: 'development',
-  apiBaseUrl: 'https://reyhanbalthazarepsa.my.id/be-survey-app/api'
+  apiBaseUrl: 'http://127.0.0.1:8000/api'
 };

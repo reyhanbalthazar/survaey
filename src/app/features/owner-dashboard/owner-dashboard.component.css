@@ -85,6 +85,12 @@ button {
   padding: 5px 9px;
 }
 
+.link-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
 .copy-error {
   margin: 0;
   color: #b91c1c;
@@ -93,6 +99,50 @@ button {
 
 a {
   color: #0f172a;
+}
+
+.action-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.45);
+  display: grid;
+  place-items: center;
+  z-index: 30;
+}
+
+.dialog {
+  width: min(520px, calc(100vw - 32px));
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 18px;
+  display: grid;
+  gap: 10px;
+}
+
+.dialog h3 {
+  margin: 0;
+}
+
+.dialog p {
+  margin: 0;
+  color: #334155;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.btn-secondary {
+  background: #64748b;
 }
 
 @media (max-width: 900px) {

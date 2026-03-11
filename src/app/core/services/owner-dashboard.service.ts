@@ -92,6 +92,23 @@ export class OwnerDashboardService {
     return this.http.post<ApiResponse<SurveyDetail>>(`${this.baseUrl}/user/surveys`, payload);
   }
 
+  getSurvey(surveyId: number): Observable<ApiResponse<SurveyDetail>> {
+    return this.http.get<ApiResponse<SurveyDetail>>(`${this.baseUrl}/user/surveys/${surveyId}`);
+  }
+
+  updateDraft(
+    surveyId: number,
+    payload: {
+      title: string;
+      description?: string;
+      expires_at: string;
+      max_responses: number;
+      questions: OwnerSurveyQuestionPayload[];
+    }
+  ): Observable<ApiResponse<SurveyDetail>> {
+    return this.http.put<ApiResponse<SurveyDetail>>(`${this.baseUrl}/user/surveys/${surveyId}`, payload);
+  }
+
   publishSurvey(surveyId: number): Observable<ApiResponse<OwnerSurvey>> {
     return this.http.post<ApiResponse<OwnerSurvey>>(`${this.baseUrl}/user/surveys/${surveyId}/publish`, {});
   }

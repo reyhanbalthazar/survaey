@@ -20,4 +20,10 @@ export class SurveyService {
   getPublicSurvey(publicToken: string): Observable<ApiResponse<SurveyDetail>> {
     return this.http.get<ApiResponse<SurveyDetail>>(`${this.baseUrl}/public-surveys/${publicToken}`);
   }
+
+  checkPublicSurveyEmail(publicToken: string, email: string): Observable<ApiResponse<unknown>> {
+    return this.http.post<ApiResponse<unknown>>(`${this.baseUrl}/public-surveys/${publicToken}/check-email`, {
+      respondent_email: email
+    });
+  }
 }

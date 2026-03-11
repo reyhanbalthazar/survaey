@@ -1,5 +1,38 @@
 <section class="panel">
   <h1>Survey Responses</h1>
+  <section class="summary">
+    <h2>Response Summary</h2>
+    @if (summaryCards.length === 0) {
+      <p>No summary available yet.</p>
+    } @else {
+      <div class="summary-grid">
+        @for (card of summaryCards; track card.questionId) {
+          <article class="summary-card">
+            <h4>{{ card.questionText }}</h4>
+            <span class="type-badge">{{ getQuestionTypeLabel(card.questionType) }}</span>
+
+            @if (card.questionType === 'text') {
+              <div class="text-answer-list">
+                @if (card.textAnswers.length === 0) {
+                  <span class="text-answer-item">-</span>
+                } @else {
+                  @for (text of card.textAnswers; track $index) {
+                    <span class="text-answer-item">{{ text }}</span>
+                  }
+                }
+              </div>
+            } @else {
+              @if (card.canvasId) {
+                <div class="chart-wrap">
+                  <canvas [id]="card.canvasId"></canvas>
+                </div>
+              }
+            }
+          </article>
+        }
+      </div>
+    }
+  </section>
 
   @if (loading) {
     <p>Loading responses...</p>
@@ -24,7 +57,7 @@
             <button type="button" (click)="viewResponse(item.id)">
               <strong>#{{ item.id }}</strong>
               <span>{{ item.respondent_email }}</span>
-              <small>{{ item.submitted_at ?? '-' }}</small>
+              <small>{{ item.submitted_at ?? '-' | date: 'medium' }}</small>
             </button>
           }
 
@@ -42,16 +75,15 @@
           <p>Select one response to see detail.</p>
         } @else {
           <p><strong>Email:</strong> {{ selectedResponse.respondent_email }}</p>
-          <p><strong>Submitted:</strong> {{ selectedResponse.submitted_at }}</p>
+          <p><strong>Submitted:</strong> {{ selectedResponse.submitted_at | date: 'medium' }}</p>
           <p><strong>Status:</strong> {{ selectedResponse.status }}</p>
 
           <hr />
 
-          @for (answer of selectedResponse.answers; track answer.id) {
+          @for (answer of displayAnswers; track answer.questionId) {
             <div class="answer">
-              <p>Question ID: {{ answer.user_survey_question_id }}</p>
-              <p>Option ID: {{ answer.user_survey_option_id ?? '-' }}</p>
-              <p>Text: {{ answer.answer_text ?? '-' }}</p>
+              <p><strong>Question:</strong> {{ answer.questionText }}</p>
+              <p><strong>Answer:</strong> {{ answer.answers.join(', ') }}</p>
             </div>
           }
         }

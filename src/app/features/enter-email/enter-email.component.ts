@@ -20,6 +20,7 @@ export class EnterEmailComponent implements OnInit {
   publicToken = '';
   survey: SurveyDetail | null = null;
   loading = true;
+  checking = false;
   localError = '';
 
   constructor(
@@ -62,9 +63,26 @@ export class EnterEmailComponent implements OnInit {
       return;
     }
 
-    void this.router.navigate(['/survey', this.publicToken, 'form'], {
-      queryParams: {
-        email: this.form.value.email
+    const email = this.form.value.email ?? '';
+    this.checking = true;
+
+    this.surveyService.checkPublicSurveyEmail(this.publicToken, email).subscribe({
+      next: (response) => {
+        this.checking = false;
+
+        if (!response.success) {
+          this.localError = response.message ?? 'This email cannot continue to this survey.';
+          return;
+        }
+
+        void this.router.navigate(['/survey', this.publicToken, 'form'], {
+          queryParams: {
+            email
+          }
+        });
+      },
+      error: () => {
+        this.checking = false;
       }
     });
   }

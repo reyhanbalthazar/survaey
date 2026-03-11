@@ -26,6 +26,7 @@ export const routes: Routes = [
     children: [
       { path: 'dashboard', component: OwnerDashboardComponent },
       { path: 'surveys/new', component: OwnerSurveyCreateComponent },
+      { path: 'surveys/:id/edit', component: OwnerSurveyCreateComponent },
       { path: 'surveys/:id/responses', component: OwnerResponsesComponent },
       { path: 'wallet', component: OwnerWalletComponent },
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' }

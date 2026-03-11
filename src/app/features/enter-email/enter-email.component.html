@@ -24,8 +24,8 @@
         <p class="error">{{ localError }}</p>
       }
 
-      <button type="submit" [disabled]="form.invalid">
-        Continue to Survey
+      <button type="submit" [disabled]="checking || form.invalid">
+        {{ checking ? 'Checking...' : 'Continue to Survey' }}
       </button>
     </form>
   }

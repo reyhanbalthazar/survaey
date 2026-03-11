@@ -41,16 +41,24 @@
             <td class="link-cell">
               <div class="link">{{ getPublicLink(survey.public_token) }}</div>
               @if (survey.public_token) {
-                <button type="button" class="copy-btn" (click)="copyPublicLink(survey)">
-                  {{ copiedSurveyId === survey.id ? 'Copied' : 'Copy Link' }}
-                </button>
+                <div class="link-actions">
+                  <button type="button" class="copy-btn" (click)="copyPublicLink(survey)">
+                    {{ copiedSurveyId === survey.id ? 'Copied' : 'Copy Link' }}
+                  </button>
+                  <button type="button" class="copy-btn" (click)="downloadQr(survey)" [disabled]="downloadingQrSurveyId === survey.id">
+                    {{ downloadingQrSurveyId === survey.id ? 'Generating QR...' : 'Download QR' }}
+                  </button>
+                </div>
               }
             </td>
             <td>
               @if (survey.status === 'draft') {
-                <button type="button" (click)="publishSurvey(survey)" [disabled]="publishingId === survey.id">
-                  {{ publishingId === survey.id ? 'Publishing...' : 'Publish (100 coin)' }}
-                </button>
+                <div class="action-group">
+                  <a [routerLink]="['/owner/surveys', survey.id, 'edit']">Edit Draft</a>
+                  <button type="button" (click)="openPublishConfirm(survey)" [disabled]="publishingId === survey.id">
+                    {{ publishingId === survey.id ? 'Publishing...' : 'Publish (100 coin)' }}
+                  </button>
+                </div>
               }
               @if (survey.status !== 'draft') {
                 <a [routerLink]="['/owner/surveys', survey.id, 'responses']">Review Responses</a>
@@ -64,5 +72,25 @@
     @if (copyError) {
       <p class="copy-error">{{ copyError }}</p>
     }
+
+    @if (qrError) {
+      <p class="copy-error">{{ qrError }}</p>
+    }
+  }
+
+  @if (publishConfirmOpen) {
+    <div class="dialog-backdrop" (click)="closePublishConfirm()">
+      <section class="dialog" (click)="$event.stopPropagation()">
+        <h3>Confirm Survey Publication</h3>
+        <p>
+          Once this survey is published, its questions and answer options can no longer be edited. A publication fee of
+          100 coins will be charged.
+        </p>
+        <div class="dialog-actions">
+          <button type="button" class="btn-secondary" (click)="closePublishConfirm()">Cancel</button>
+          <button type="button" (click)="confirmPublishSurvey()">Publish Now</button>
+        </div>
+      </section>
+    </div>
   }
 </section>

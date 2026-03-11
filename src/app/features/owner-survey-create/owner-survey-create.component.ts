@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
-import { FormArray, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Component, OnInit, inject } from '@angular/core';
+import { ReactiveFormsModule, UntypedFormArray, UntypedFormBuilder, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { OwnerDashboardService } from '../../core/services/owner-dashboard.service';
 import { ErrorStateService } from '../../core/services/error-state.service';
 import { OwnerSurveyQuestionPayload } from '../../models/owner.model';
+import { SurveyDetail } from '../../models/survey.model';
 
 @Component({
   selector: 'app-owner-survey-create',
@@ -14,10 +15,14 @@ import { OwnerSurveyQuestionPayload } from '../../models/owner.model';
   templateUrl: './owner-survey-create.component.html',
   styleUrl: './owner-survey-create.component.css'
 })
-export class OwnerSurveyCreateComponent {
-  private readonly fb = inject(FormBuilder);
+export class OwnerSurveyCreateComponent implements OnInit {
+  private readonly fb = inject(UntypedFormBuilder);
+  private readonly route = inject(ActivatedRoute);
 
   saving = false;
+  loadingSurvey = false;
+  isEditMode = false;
+  private surveyId: number | null = null;
 
   readonly form = this.fb.group({
     title: ['', [Validators.required]],
@@ -33,8 +38,33 @@ export class OwnerSurveyCreateComponent {
     private readonly router: Router
   ) {}
 
-  get questions(): FormArray {
-    return this.form.get('questions') as FormArray;
+  ngOnInit(): void {
+    const rawId = this.route.snapshot.paramMap.get('id');
+    if (!rawId) {
+      return;
+    }
+
+    const parsedId = Number(rawId);
+    if (!Number.isFinite(parsedId) || parsedId <= 0) {
+      void this.router.navigate(['/owner/dashboard']);
+      return;
+    }
+
+    this.surveyId = parsedId;
+    this.isEditMode = true;
+    this.loadSurveyForEdit(parsedId);
+  }
+
+  get submitButtonLabel(): string {
+    if (this.saving) {
+      return this.isEditMode ? 'Updating...' : 'Saving...';
+    }
+
+    return this.isEditMode ? 'Update Draft' : 'Save Draft';
+  }
+
+  get questions(): UntypedFormArray {
+    return this.form.get('questions') as UntypedFormArray;
   }
 
   addQuestion(): void {
@@ -49,8 +79,8 @@ export class OwnerSurveyCreateComponent {
     this.questions.removeAt(index);
   }
 
-  optionsAt(index: number): FormArray {
-    return this.questions.at(index).get('options') as FormArray;
+  optionsAt(index: number): UntypedFormArray {
+    return this.questions.at(index).get('options') as UntypedFormArray;
   }
 
   addOption(questionIndex: number): void {
@@ -72,7 +102,7 @@ export class OwnerSurveyCreateComponent {
   onTypeChange(questionIndex: number): void {
     const group = this.questions.at(questionIndex);
     const type = String(group.get('question_type')?.value ?? 'text');
-    const options = group.get('options') as FormArray;
+    const options = group.get('options') as UntypedFormArray;
 
     if (type === 'text') {
       options.clear();
@@ -115,23 +145,28 @@ export class OwnerSurveyCreateComponent {
       return payload;
     });
 
-    this.dashboardService
-      .createDraft({
-        title: String(this.form.controls.title.value ?? ''),
-        description: String(this.form.controls.description.value ?? ''),
-        expires_at: String(this.form.controls.expires_at.value ?? ''),
-        max_responses: Number(this.form.controls.max_responses.value ?? 100),
-        questions: questionPayloads
-      })
-      .subscribe({
-        next: () => {
-          this.saving = false;
-          void this.router.navigate(['/owner/dashboard']);
-        },
-        error: () => {
-          this.saving = false;
-        }
-      });
+    const payload = {
+      title: String(this.form.controls['title'].value ?? ''),
+      description: String(this.form.controls['description'].value ?? ''),
+      expires_at: String(this.form.controls['expires_at'].value ?? ''),
+      max_responses: Number(this.form.controls['max_responses'].value ?? 100),
+      questions: questionPayloads
+    };
+
+    const request$ =
+      this.isEditMode && this.surveyId
+        ? this.dashboardService.updateDraft(this.surveyId, payload)
+        : this.dashboardService.createDraft(payload);
+
+    request$.subscribe({
+      next: () => {
+        this.saving = false;
+        void this.router.navigate(['/owner/dashboard']);
+      },
+      error: () => {
+        this.saving = false;
+      }
+    });
   }
 
   private createQuestionGroup() {
@@ -141,5 +176,89 @@ export class OwnerSurveyCreateComponent {
       is_required: [true],
       options: this.fb.array([])
     });
+  }
+
+  private loadSurveyForEdit(surveyId: number): void {
+    this.loadingSurvey = true;
+    this.dashboardService.getSurvey(surveyId).subscribe({
+      next: (response) => {
+        const survey = response.data;
+        if (!survey) {
+          this.loadingSurvey = false;
+          void this.router.navigate(['/owner/dashboard']);
+          return;
+        }
+
+        if (survey.status !== 'draft') {
+          this.errorState.setMessage('Only draft surveys can be edited.');
+          this.loadingSurvey = false;
+          void this.router.navigate(['/owner/dashboard']);
+          return;
+        }
+
+        this.patchFormFromSurvey(survey);
+        this.loadingSurvey = false;
+      },
+      error: () => {
+        this.loadingSurvey = false;
+        void this.router.navigate(['/owner/dashboard']);
+      }
+    });
+  }
+
+  private patchFormFromSurvey(survey: SurveyDetail): void {
+    this.form.patchValue({
+      title: survey.title ?? '',
+      description: survey.description ?? '',
+      expires_at: this.toDatetimeLocal(survey.expires_at),
+      max_responses: survey.max_responses ?? 100
+    });
+
+    const questions = this.fb.array([this.createQuestionGroup()]);
+    questions.clear();
+    for (const question of survey.questions ?? []) {
+      const optionsArray = this.fb.array(
+        (question.options ?? []).map((option) =>
+          this.fb.group({
+            option_text: [option.option_text, [Validators.required]]
+          })
+        )
+      );
+
+      questions.push(
+        this.fb.group({
+          question_text: [question.question_text, [Validators.required]],
+          question_type: [question.question_type, [Validators.required]],
+          is_required: [Boolean(question.is_required)],
+          options: optionsArray
+        })
+      );
+    }
+
+    if (questions.length === 0) {
+      questions.push(this.createQuestionGroup());
+    }
+
+    this.form.setControl('questions', questions);
+  }
+
+  private toDatetimeLocal(raw: string | null): string {
+    if (!raw) {
+      return '';
+    }
+
+    const date = new Date(raw);
+    if (Number.isNaN(date.getTime())) {
+      return '';
+    }
+
+    const pad = (value: number) => String(value).padStart(2, '0');
+    const year = date.getFullYear();
+    const month = pad(date.getMonth() + 1);
+    const day = pad(date.getDate());
+    const hours = pad(date.getHours());
+    const minutes = pad(date.getMinutes());
+
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
   }
 }

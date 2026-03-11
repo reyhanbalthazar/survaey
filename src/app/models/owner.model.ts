@@ -58,6 +58,12 @@ export interface OwnerSurveyResponseItem {
   respondent_email: string;
   submitted_at: string | null;
   status: string;
+  answers?: Array<{
+    id: number;
+    user_survey_question_id: number;
+    user_survey_option_id: number | null;
+    answer_text: string | null;
+  }>;
 }
 
 export interface OwnerSurveyResponseDetail {
@@ -72,4 +78,3 @@ export interface OwnerSurveyResponseDetail {
     answer_text: string | null;
   }>;
 }
-

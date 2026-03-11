@@ -1,7 +1,11 @@
 <section class="panel">
-  <h1>Create Draft Survey</h1>
+  <h1>{{ isEditMode ? 'Edit Draft Survey' : 'Create Draft Survey' }}</h1>
 
   <form [formGroup]="form" (ngSubmit)="submit()">
+    @if (loadingSurvey) {
+      <p>Loading draft survey...</p>
+    }
+
     <div class="grid">
       <label>
         Title
@@ -24,10 +28,7 @@
       <textarea rows="3" formControlName="description"></textarea>
     </label>
 
-    <div class="question-header">
-      <h2>Questions</h2>
-      <button type="button" (click)="addQuestion()">+ Add Question</button>
-    </div>
+    <h2>Questions</h2>
 
     <div formArrayName="questions" class="questions">
       @for (question of questions.controls; track $index; let qIndex = $index) {
@@ -78,8 +79,13 @@
       }
     </div>
 
-    <button type="submit" [disabled]="saving || form.invalid">
-      {{ saving ? 'Saving...' : 'Save Draft' }}
-    </button>
+    <div class="form-actions">
+      <button type="button" class="secondary-btn" (click)="addQuestion()" [disabled]="saving || loadingSurvey">
+        + Add Question
+      </button>
+      <button type="submit" [disabled]="saving || loadingSurvey || form.invalid">
+        {{ submitButtonLabel }}
+      </button>
+    </div>
   </form>
 </section>
