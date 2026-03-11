@@ -1,0 +1,67 @@
+<section class="panel">
+  <h1>Voucher Redemptions</h1>
+
+  <form class="filters" [formGroup]="filterForm" (ngSubmit)="loadVouchers()">
+    <select formControlName="status">
+      <option value="all">All status</option>
+      <option value="issued">Issued</option>
+      <option value="redeemed">Redeemed</option>
+    </select>
+
+    <input type="text" formControlName="search" placeholder="Search code, email, or survey title" />
+    <button type="submit">Apply</button>
+  </form>
+
+  @if (errorMessage) {
+    <p class="error">{{ errorMessage }}</p>
+  }
+
+  @if (loading) {
+    <p>Loading vouchers...</p>
+  } @else {
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Status</th>
+            <th>Survey</th>
+            <th>Respondent</th>
+            <th class="date-col">Issued</th>
+            <th class="date-col">Redeemed</th>
+            <th class="action-col">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (vouchers.length === 0) {
+            <tr>
+              <td colspan="7">No vouchers found.</td>
+            </tr>
+          } @else {
+            @for (voucher of vouchers; track voucher.id) {
+              <tr>
+                <td>{{ voucher.voucher_code }}</td>
+                <td>
+                  <span class="status" [class.redeemed]="voucher.status === 'redeemed'">{{ voucher.status }}</span>
+                </td>
+                <td>{{ voucher.survey?.title ?? '-' }}</td>
+                <td>{{ voucher.response?.respondent_email ?? '-' }}</td>
+                <td class="date-col">{{ voucher.issued_at ? (voucher.issued_at | date: 'medium') : '-' }}</td>
+                <td class="date-col">{{ voucher.redeemed_at ? (voucher.redeemed_at | date: 'medium') : '-' }}</td>
+                <td class="action-col">
+                  @if (voucher.status === 'issued') {
+                    <button type="button" (click)="redeemVoucher(voucher)" [disabled]="redeemingVoucherId === voucher.id">
+                      {{ redeemingVoucherId === voucher.id ? 'Redeeming...' : 'Mark Redeemed' }}
+                    </button>
+                  } @else {
+                    <span>-</span>
+                  }
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

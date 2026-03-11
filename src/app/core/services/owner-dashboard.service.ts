@@ -9,6 +9,7 @@ import {
   OwnerSurveyQuestionPayload,
   OwnerSurveyResponseDetail,
   OwnerSurveyResponseItem,
+  OwnerSurveyVoucher,
   OwnerWallet,
   OwnerWalletTransaction
 } from '../../models/owner.model';
@@ -121,5 +122,20 @@ export class OwnerDashboardService {
     return this.http.get<ApiResponse<OwnerSurveyResponseDetail>>(
       `${this.baseUrl}/user/surveys/${surveyId}/responses/${responseId}`
     );
+  }
+
+  getVouchers(params?: { status?: 'all' | 'issued' | 'redeemed'; search?: string }): Observable<ApiResponse<OwnerSurveyVoucher[]>> {
+    return this.http.get<ApiResponse<OwnerSurveyVoucher[]>>(`${this.baseUrl}/user/vouchers`, {
+      params: {
+        status: params?.status ?? 'all',
+        search: params?.search ?? ''
+      }
+    });
+  }
+
+  redeemVoucher(voucherId: number, redeemNotes?: string): Observable<ApiResponse<OwnerSurveyVoucher>> {
+    return this.http.post<ApiResponse<OwnerSurveyVoucher>>(`${this.baseUrl}/user/vouchers/${voucherId}/redeem`, {
+      redeem_notes: redeemNotes ?? ''
+    });
   }
 }

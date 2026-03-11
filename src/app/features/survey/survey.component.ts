@@ -149,10 +149,12 @@ export class SurveyComponent implements OnInit, OnDestroy {
       next: (response) => {
         this.submitting = false;
         this.submitted = true;
+        const voucherCode = response.data?.voucher_code ?? response.voucher_code ?? '';
 
         void this.router.navigate(['/survey', this.publicToken, 'done'], {
           queryParams: {
-            email: this.email
+            email: this.email,
+            voucher: voucherCode || null
           }
         });
       },

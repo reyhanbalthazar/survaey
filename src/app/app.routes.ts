@@ -9,6 +9,7 @@ import { OwnerRegisterComponent } from './features/owner-register/owner-register
 import { OwnerResponsesComponent } from './features/owner-responses/owner-responses.component';
 import { OwnerSurveyCreateComponent } from './features/owner-survey-create/owner-survey-create.component';
 import { OwnerVerifyEmailComponent } from './features/owner-verify-email/owner-verify-email.component';
+import { OwnerVouchersComponent } from './features/owner-vouchers/owner-vouchers.component';
 import { OwnerWalletComponent } from './features/owner-wallet/owner-wallet.component';
 import { SurveyComponent } from './features/survey/survey.component';
 import { ThankYouComponent } from './features/thank-you/thank-you.component';
@@ -28,6 +29,7 @@ export const routes: Routes = [
       { path: 'surveys/new', component: OwnerSurveyCreateComponent },
       { path: 'surveys/:id/edit', component: OwnerSurveyCreateComponent },
       { path: 'surveys/:id/responses', component: OwnerResponsesComponent },
+      { path: 'vouchers', component: OwnerVouchersComponent },
       { path: 'wallet', component: OwnerWalletComponent },
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' }
     ]

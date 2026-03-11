@@ -78,3 +78,24 @@ export interface OwnerSurveyResponseDetail {
     answer_text: string | null;
   }>;
 }
+
+export interface OwnerSurveyVoucher {
+  id: number;
+  user_id: number;
+  user_survey_id: number;
+  user_survey_response_id: number;
+  voucher_type: string;
+  voucher_code: string;
+  status: 'issued' | 'redeemed' | string;
+  issued_at: string;
+  redeemed_at: string | null;
+  redeem_notes?: string | null;
+  survey?: {
+    id: number;
+    title: string;
+  } | null;
+  response?: {
+    id: number;
+    respondent_email: string;
+  } | null;
+}

@@ -7,3 +7,7 @@ export interface SubmitSurveyPayload {
     option_ids?: number[];
   }>;
 }
+
+export interface SubmitSurveyResult {
+  voucher_code?: string;
+}
