@@ -48,6 +48,8 @@ export class OwnerResponsesComponent implements OnInit, OnDestroy {
   private optionMap = new Map<number, SurveyOption>();
   private chartInstances: Array<{ destroy: () => void }> = [];
   private chartJsReady: Promise<void> | null = null;
+  private chartRenderToken = 0;
+  private chartRenderTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
   readonly filterForm = this.fb.nonNullable.group({
     search: [''],
@@ -63,6 +65,7 @@ export class OwnerResponsesComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.clearPendingChartRender();
     this.destroyCharts();
   }
 
@@ -265,6 +268,10 @@ export class OwnerResponsesComponent implements OnInit, OnDestroy {
   }
 
   private renderCharts(): void {
+    this.chartRenderToken += 1;
+    const renderToken = this.chartRenderToken;
+
+    this.clearPendingChartRender();
     this.destroyCharts();
 
     if (!this.isBrowser) {
@@ -277,7 +284,11 @@ export class OwnerResponsesComponent implements OnInit, OnDestroy {
         return;
       }
 
-      setTimeout(() => {
+      this.chartRenderTimeoutId = setTimeout(() => {
+        if (renderToken !== this.chartRenderToken) {
+          return;
+        }
+
         for (const card of this.summaryCards) {
           if (!card.canvasId || card.labels.length === 0) {
             continue;
@@ -286,6 +297,11 @@ export class OwnerResponsesComponent implements OnInit, OnDestroy {
           const canvas = document.getElementById(card.canvasId) as HTMLCanvasElement | null;
           if (!canvas) {
             continue;
+          }
+
+          const existingChart = typeof chartConstructor.getChart === 'function' ? chartConstructor.getChart(canvas) : null;
+          if (existingChart) {
+            existingChart.destroy();
           }
 
           const instance = new chartConstructor(canvas, {
@@ -338,6 +354,8 @@ export class OwnerResponsesComponent implements OnInit, OnDestroy {
 
           this.chartInstances.push(instance);
         }
+
+        this.chartRenderTimeoutId = null;
       }, 0);
     });
   }
@@ -347,6 +365,13 @@ export class OwnerResponsesComponent implements OnInit, OnDestroy {
       instance.destroy();
     }
     this.chartInstances = [];
+  }
+
+  private clearPendingChartRender(): void {
+    if (this.chartRenderTimeoutId !== null) {
+      clearTimeout(this.chartRenderTimeoutId);
+      this.chartRenderTimeoutId = null;
+    }
   }
 
   private ensureChartJsLoaded(): Promise<void> {
