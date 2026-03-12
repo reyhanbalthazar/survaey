@@ -2,24 +2,28 @@
   min-height: 100vh;
   display: grid;
   place-items: center;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  background:
+    radial-gradient(circle at top left, rgba(168, 125, 84, 0.18), transparent 26%),
+    radial-gradient(circle at bottom right, rgba(6, 78, 59, 0.12), transparent 24%),
+    var(--survaey-bg);
   padding: 24px;
 }
 
 .card {
   width: min(560px, 100%);
-  background: #fff;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  background: var(--survaey-surface);
+  border-radius: 28px;
+  padding: 30px;
+  border: 1px solid var(--survaey-border);
+  box-shadow: var(--survaey-shadow);
 }
 
 h1 {
   margin: 0 0 8px;
+  color: var(--survaey-primary);
 }
 
 p {
   margin: 0 0 10px;
-  color: #475569;
+  color: var(--survaey-muted);
 }
-

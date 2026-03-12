@@ -4,17 +4,19 @@
 }
 
 .summary {
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  padding: 12px;
+  background: var(--survaey-surface);
+  border: 1px solid var(--survaey-border);
+  border-radius: 22px;
+  padding: 16px;
   display: grid;
   gap: 10px;
+  box-shadow: var(--survaey-shadow);
 }
 
 .summary h2 {
   margin: 0;
   font-size: 18px;
+  color: var(--survaey-primary);
 }
 
 .summary-grid {
@@ -24,25 +26,26 @@
 }
 
 .summary-card {
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 10px;
+  border: 1px solid var(--survaey-border);
+  border-radius: 18px;
+  padding: 14px;
   display: grid;
   gap: 10px;
-  background: #f8fafc;
+  background: rgba(255, 250, 242, 0.88);
 }
 
 .summary-card h4 {
   margin: 0;
   font-size: 14px;
+  color: var(--survaey-primary);
 }
 
 .type-badge {
   width: fit-content;
   font-size: 12px;
-  color: #334155;
-  background: #e2e8f0;
-  border: 1px solid #cbd5e1;
+  color: var(--survaey-primary);
+  background: rgba(168, 125, 84, 0.14);
+  border: 1px solid rgba(168, 125, 84, 0.25);
   border-radius: 999px;
   padding: 3px 8px;
 }
@@ -59,11 +62,11 @@
 }
 
 .text-answer-item {
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--survaey-border);
   border-radius: 999px;
   padding: 4px 8px;
   font-size: 12px;
-  background: #fff;
+  background: var(--survaey-surface-strong);
 }
 
 .filter {
@@ -73,15 +76,8 @@
   align-items: center;
 }
 
-.filter input,
-.filter select {
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  padding: 9px 10px;
-}
-
 .filter small {
-  color: #475569;
+  color: var(--survaey-muted);
 }
 
 .layout {
@@ -92,10 +88,11 @@
 
 .list,
 .detail {
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  padding: 12px;
+  background: var(--survaey-surface);
+  border: 1px solid var(--survaey-border);
+  border-radius: 22px;
+  padding: 16px;
+  box-shadow: var(--survaey-shadow);
 }
 
 .list {
@@ -105,13 +102,19 @@
 
 .list button {
   text-align: left;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  background: #f8fafc;
-  padding: 10px;
+  border: 1px solid var(--survaey-border);
+  border-radius: 16px;
+  background: rgba(255, 250, 242, 0.94);
+  padding: 12px;
   display: grid;
   gap: 4px;
-  cursor: pointer;
+  color: var(--survaey-text);
+  box-shadow: none;
+}
+
+.list button:hover:not(:disabled) {
+  transform: none;
+  background: rgba(168, 125, 84, 0.12);
 }
 
 .pagination {
@@ -122,24 +125,15 @@
 }
 
 .pagination button {
-  border: 0;
-  border-radius: 8px;
-  background: #334155;
-  color: #fff;
-  padding: 7px 10px;
-  cursor: pointer;
-}
-
-.pagination button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+  background: var(--survaey-primary);
 }
 
 .answer {
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 8px;
+  border: 1px solid var(--survaey-border);
+  border-radius: 16px;
+  padding: 12px;
   margin-bottom: 8px;
+  background: rgba(255, 250, 242, 0.94);
 }
 
 .answer p {

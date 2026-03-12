@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { EnterEmailComponent } from './features/enter-email/enter-email.component';
 import { InvalidLinkComponent } from './features/invalid-link/invalid-link.component';
+import { LandingPageComponent } from './features/landing-page/landing-page.component';
 import { OwnerCheckEmailComponent } from './features/owner-check-email/owner-check-email.component';
 import { OwnerDashboardComponent } from './features/owner-dashboard/owner-dashboard.component';
 import { OwnerLayoutComponent } from './features/owner-layout/owner-layout.component';
@@ -37,6 +38,6 @@ export const routes: Routes = [
   { path: 'survey/:publicToken', component: EnterEmailComponent },
   { path: 'survey/:publicToken/form', component: SurveyComponent },
   { path: 'survey/:publicToken/done', component: ThankYouComponent },
-  { path: '', component: InvalidLinkComponent },
+  { path: '', component: LandingPageComponent },
   { path: '**', component: InvalidLinkComponent }
 ];

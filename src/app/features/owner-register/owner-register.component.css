@@ -2,72 +2,61 @@
   min-height: 100vh;
   display: grid;
   place-items: center;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  background:
+    radial-gradient(circle at top left, rgba(168, 125, 84, 0.18), transparent 26%),
+    radial-gradient(circle at bottom right, rgba(6, 78, 59, 0.12), transparent 24%),
+    var(--survaey-bg);
   padding: 24px;
 }
 
 .card {
   width: min(460px, 100%);
-  background: #fff;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  background: var(--survaey-surface);
+  border-radius: 28px;
+  padding: 28px;
+  border: 1px solid var(--survaey-border);
+  box-shadow: var(--survaey-shadow);
+  backdrop-filter: blur(12px);
 }
 
 h1 {
   margin: 0 0 6px;
+  color: var(--survaey-primary);
 }
 
 p {
   margin: 0 0 16px;
-  color: #475569;
+  color: var(--survaey-muted);
 }
 
 form {
   display: grid;
-  gap: 10px;
-}
-
-input {
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  padding: 10px 12px;
-  font-size: 14px;
+  gap: 12px;
 }
 
 button {
   margin-top: 8px;
-  border: 0;
-  border-radius: 8px;
-  padding: 11px 14px;
-  background: #0f172a;
-  color: #fff;
-  cursor: pointer;
-}
-
-button:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
+  background: var(--survaey-accent);
 }
 
 .error {
   margin: 2px 0;
-  color: #b91c1c;
+  color: #8f2f25;
   font-size: 13px;
 }
 
 .success {
   margin: 2px 0;
-  color: #047857;
+  color: var(--survaey-primary);
   font-size: 13px;
 }
 
 small {
   display: block;
   margin-top: 12px;
-  color: #475569;
+  color: var(--survaey-muted);
 }
 
 small a {
-  color: #0f172a;
+  color: var(--survaey-primary);
 }

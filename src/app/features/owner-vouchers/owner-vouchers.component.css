@@ -9,48 +9,36 @@
   gap: 8px;
 }
 
-select,
-input {
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  padding: 9px 10px;
-}
-
 button {
-  border: 0;
-  border-radius: 8px;
-  background: #0f172a;
-  color: #fff;
-  padding: 8px 12px;
-  cursor: pointer;
-}
-
-button:disabled {
-  opacity: 0.65;
-  cursor: not-allowed;
+  background: var(--survaey-accent);
 }
 
 .error {
   margin: 0;
-  color: #b91c1c;
+  color: #8f2f25;
 }
 
 table {
   width: 100%;
   min-width: 980px;
   border-collapse: collapse;
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
+  background: var(--survaey-surface-strong);
+  border: 1px solid var(--survaey-border);
+  border-radius: 22px;
+  box-shadow: var(--survaey-shadow);
 }
 
 th,
 td {
   text-align: left;
   padding: 10px;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid rgba(6, 78, 59, 0.08);
   font-size: 13px;
   vertical-align: middle;
+}
+
+th {
+  color: var(--survaey-primary);
 }
 
 .table-wrap {
@@ -71,14 +59,14 @@ td {
   display: inline-block;
   padding: 2px 8px;
   border-radius: 999px;
-  background: #e2e8f0;
-  color: #334155;
+  background: rgba(168, 125, 84, 0.14);
+  color: var(--survaey-primary);
   font-size: 12px;
 }
 
 .status.redeemed {
-  background: #dcfce7;
-  color: #166534;
+  background: rgba(6, 78, 59, 0.1);
+  color: var(--survaey-primary);
 }
 
 @media (max-width: 900px) {

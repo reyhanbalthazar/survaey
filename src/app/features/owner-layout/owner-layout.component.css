@@ -1,57 +1,78 @@
 .owner-shell {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: 260px 1fr;
+  grid-template-columns: 280px 1fr;
+  background:
+    radial-gradient(circle at top left, rgba(168, 125, 84, 0.15), transparent 22%),
+    var(--survaey-bg);
 }
 
 .sidebar {
-  background: #0f172a;
-  color: #f8fafc;
-  padding: 20px;
+  background: linear-gradient(180deg, #064e3b 0%, #043629 100%);
+  color: #fdf4e3;
+  padding: 28px 22px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 18px;
+  border-right: 1px solid rgba(255, 244, 227, 0.16);
+  box-shadow: inset -1px 0 0 rgba(255, 244, 227, 0.08);
 }
 
 .sidebar h2 {
   margin: 0;
+  font-size: 30px;
+  letter-spacing: 0.03em;
 }
 
 .user {
   margin: 0;
-  color: #cbd5e1;
+  color: rgba(253, 244, 227, 0.78);
+  font-size: 14px;
 }
 
 nav {
   display: grid;
-  gap: 8px;
+  gap: 10px;
 }
 
 nav a {
-  color: #cbd5e1;
+  color: rgba(253, 244, 227, 0.84);
   text-decoration: none;
-  padding: 10px;
-  border-radius: 8px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  border: 1px solid transparent;
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+
+nav a:hover {
+  transform: translateX(2px);
+  background: rgba(253, 244, 227, 0.08);
 }
 
 nav a.active {
-  background: #1e293b;
-  color: #fff;
+  background: rgba(168, 125, 84, 0.18);
+  color: #fffaf2;
+  border-color: rgba(168, 125, 84, 0.34);
 }
 
 .sidebar button {
   margin-top: auto;
-  border: 1px solid #334155;
+  border: 1px solid rgba(253, 244, 227, 0.22);
   background: transparent;
-  color: #f8fafc;
-  border-radius: 8px;
-  padding: 10px;
+  color: #fdf4e3;
+  border-radius: 999px;
+  padding: 12px 14px;
   cursor: pointer;
+  box-shadow: none;
+}
+
+.sidebar button:hover:not(:disabled) {
+  background: rgba(253, 244, 227, 0.08);
+  transform: none;
 }
 
 .content {
-  background: #f8fafc;
-  padding: 20px;
+  padding: 26px;
 }
 
 @media (max-width: 900px) {
@@ -61,10 +82,15 @@ nav a.active {
 
   .sidebar {
     gap: 10px;
+    border-right: 0;
+    border-bottom: 1px solid rgba(255, 244, 227, 0.14);
   }
 
   .sidebar button {
     margin-top: 8px;
   }
-}
 
+  .content {
+    padding: 18px;
+  }
+}

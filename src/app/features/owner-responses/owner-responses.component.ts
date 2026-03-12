@@ -296,7 +296,7 @@ export class OwnerResponsesComponent implements OnInit, OnDestroy {
                 {
                   label: 'Total Responses',
                   data: card.counts,
-                  backgroundColor: '#334155',
+                  backgroundColor: '#A87D54',
                   borderRadius: 6
                 }
               ]
@@ -313,11 +313,23 @@ export class OwnerResponsesComponent implements OnInit, OnDestroy {
                 }
               },
               scales: {
+                x: {
+                  ticks: {
+                    color: '#064E3B'
+                  },
+                  grid: {
+                    display: false
+                  }
+                },
                 y: {
                   beginAtZero: true,
                   ticks: {
                     precision: 0,
-                    stepSize: 1
+                    stepSize: 1,
+                    color: '#064E3B'
+                  },
+                  grid: {
+                    color: 'rgba(6, 78, 59, 0.10)'
                   }
                 }
               }

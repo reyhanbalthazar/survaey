@@ -5,91 +5,91 @@
 
 .banner {
   margin: 0;
-  border-radius: 8px;
-  padding: 10px 12px;
+  border-radius: 18px;
+  padding: 12px 14px;
   font-size: 14px;
 }
 
 .success-banner {
-  background: #ecfdf5;
-  color: #065f46;
-  border: 1px solid #a7f3d0;
+  background: rgba(6, 78, 59, 0.1);
+  color: var(--survaey-primary);
+  border: 1px solid rgba(6, 78, 59, 0.18);
 }
 
 .error-banner {
-  background: #fef2f2;
-  color: #991b1b;
-  border: 1px solid #fecaca;
+  background: rgba(143, 47, 37, 0.08);
+  color: #8f2f25;
+  border: 1px solid rgba(143, 47, 37, 0.18);
 }
 
 .balance {
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  padding: 12px;
+  background: var(--survaey-surface);
+  border: 1px solid var(--survaey-border);
+  border-radius: 22px;
+  padding: 18px;
+  box-shadow: var(--survaey-shadow);
 }
 
 .balance h3 {
   margin: 0;
   font-size: 14px;
-  color: #475569;
+  color: var(--survaey-muted);
 }
 
 .balance p {
   margin: 8px 0 0;
   font-size: 24px;
   font-weight: 700;
+  color: var(--survaey-primary);
 }
 
 .topup {
   display: grid;
   gap: 8px;
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  padding: 12px;
+  background: var(--survaey-surface);
+  border: 1px solid var(--survaey-border);
+  border-radius: 22px;
+  padding: 18px;
+  box-shadow: var(--survaey-shadow);
 }
 
 label {
   display: grid;
   gap: 6px;
   font-size: 14px;
-}
-
-input {
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  padding: 9px 10px;
+  color: var(--survaey-muted);
 }
 
 button {
-  border: 0;
-  border-radius: 8px;
-  background: #0f172a;
-  color: #fff;
-  padding: 9px 12px;
-  cursor: pointer;
+  background: var(--survaey-accent);
 }
 
 .error {
   margin: 0;
-  color: #b91c1c;
+  color: #8f2f25;
   font-size: 13px;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  background: #fff;
-  border: 1px solid #e2e8f0;
+  background: var(--survaey-surface-strong);
+  border: 1px solid var(--survaey-border);
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: var(--survaey-shadow);
 }
 
 th,
 td {
   text-align: left;
   padding: 10px;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid rgba(6, 78, 59, 0.08);
   font-size: 13px;
+}
+
+th {
+  color: var(--survaey-primary);
 }
 
 @media (max-width: 900px) {
