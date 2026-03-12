@@ -178,7 +178,7 @@ export class OwnerResponsesComponent implements OnInit, OnDestroy {
     const grouped = new Map<number, DisplayAnswerRow>();
 
     for (const answer of response.answers ?? []) {
-      const questionId = answer.user_survey_question_id;
+      const questionId = Number(answer.user_survey_question_id);
       const question = answer.question ?? this.questionMap.get(questionId);
 
       if (!grouped.has(questionId)) {
@@ -194,9 +194,10 @@ export class OwnerResponsesComponent implements OnInit, OnDestroy {
         continue;
       }
 
-      if (answer.user_survey_option_id) {
-        const option = answer.option ?? this.optionMap.get(answer.user_survey_option_id);
-        row.answers.push(option?.option_text ?? `Option #${answer.user_survey_option_id}`);
+      const optionId = answer.user_survey_option_id != null ? Number(answer.user_survey_option_id) : null;
+      if (optionId) {
+        const option = answer.option ?? this.optionMap.get(optionId);
+        row.answers.push(option?.option_text ?? `Option #${optionId}`);
       } else if (answer.answer_text && answer.answer_text.trim() !== '') {
         row.answers.push(answer.answer_text.trim());
       }
@@ -226,22 +227,25 @@ export class OwnerResponsesComponent implements OnInit, OnDestroy {
     for (const response of this.responses) {
       for (const answer of response.answers ?? []) {
         const answerQuestion = answer.question;
-        if (answerQuestion && !questionSourceMap.has(answerQuestion.id)) {
-          questionSourceMap.set(answerQuestion.id, {
-            id: answerQuestion.id,
+        const answerQuestionId = Number(answerQuestion?.id ?? answer.user_survey_question_id);
+        if (answerQuestion && !questionSourceMap.has(answerQuestionId)) {
+          questionSourceMap.set(answerQuestionId, {
+            id: answerQuestionId,
             user_survey_id: this.surveyId,
             question_text: answerQuestion.question_text,
             question_type: answerQuestion.question_type ?? 'text',
             options: [],
             is_required: false,
-            sort_order: answerQuestion.id
+            sort_order: answerQuestionId
           });
         }
 
-        if (answer.user_survey_option_id && answer.option?.option_text) {
-          const optionMap = optionTextMap.get(answer.user_survey_question_id) ?? new Map<number, string>();
-          optionMap.set(answer.user_survey_option_id, answer.option.option_text);
-          optionTextMap.set(answer.user_survey_question_id, optionMap);
+        const answerQuestionKey = Number(answer.user_survey_question_id);
+        const answerOptionId = answer.user_survey_option_id != null ? Number(answer.user_survey_option_id) : null;
+        if (answerOptionId && answer.option?.option_text) {
+          const optionMap = optionTextMap.get(answerQuestionKey) ?? new Map<number, string>();
+          optionMap.set(answerOptionId, answer.option.option_text);
+          optionTextMap.set(answerQuestionKey, optionMap);
         }
       }
     }
@@ -254,7 +258,7 @@ export class OwnerResponsesComponent implements OnInit, OnDestroy {
 
         for (const response of this.responses) {
           for (const answer of response.answers ?? []) {
-            if (answer.user_survey_question_id !== question.id) {
+            if (Number(answer.user_survey_question_id) !== question.id) {
               continue;
             }
 
@@ -285,7 +289,10 @@ export class OwnerResponsesComponent implements OnInit, OnDestroy {
         let count = 0;
         for (const response of this.responses) {
           for (const answer of response.answers ?? []) {
-            if (answer.user_survey_question_id === question.id && answer.user_survey_option_id === optionId) {
+            if (
+              Number(answer.user_survey_question_id) === question.id &&
+              Number(answer.user_survey_option_id) === optionId
+            ) {
               count += 1;
             }
           }
