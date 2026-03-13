@@ -42,7 +42,7 @@
               <tr>
                 <td>{{ voucher.voucher_code }}</td>
                 <td>
-                  <span class="status" [class.redeemed]="voucher.status === 'redeemed'">{{ voucher.status }}</span>
+                  <span class="status" [class.redeemed]="voucher.status === 'redeemed'">{{ statusLabels[voucher.status] }}</span>
                 </td>
                 <td>{{ voucher.survey?.title ?? '-' }}</td>
                 <td>{{ voucher.response?.respondent_email ?? '-' }}</td>

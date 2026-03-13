@@ -56,6 +56,12 @@ export class OwnerResponsesComponent implements OnInit, OnDestroy {
     status: ['all']
   });
 
+  // Define a clear mapping object
+  readonly statusLabels: Record<string, string> = {
+    'submitted': 'Submitted',
+    'invalid': 'Invalid',
+  };
+
   constructor(
     @Inject(PLATFORM_ID) platformId: object,
     private readonly route: ActivatedRoute,

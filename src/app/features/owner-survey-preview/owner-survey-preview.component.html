@@ -1,0 +1,64 @@
+<section class="page">
+  @if (loading) {
+    <p>Loading survey preview...</p>
+  } @else if (localError) {
+    <article class="message-card">
+      <h1>Preview Unavailable</h1>
+      <p>{{ localError }}</p>
+      <button type="button" (click)="backToDashboard()">Back to Dashboard</button>
+    </article>
+  } @else if (survey) {
+    <header>
+      <p class="preview-badge">Preview</p>
+      <p class="email">Respondent: {{ previewEmail }}</p>
+      <h1>{{ survey.title }}</h1>
+      <div class="progress-wrap" aria-label="Survey progress preview">
+        <div class="bar">
+          <div class="value" [style.width.%]="0"></div>
+        </div>
+        <small>0/{{ requiredQuestions.length }} required answered</small>
+      </div>
+    </header>
+
+    <form class="preview-form">
+      @for (q of survey.questions; track q.id) {
+        <article>
+          <label [for]="'preview-q-' + q.id">
+            {{ q.question_text }}
+            @if (q.is_required) {
+              <span>*</span>
+            }
+          </label>
+
+          @if (isTextType(q)) {
+            <input [id]="'preview-q-' + q.id" type="text" value="" placeholder="Short text answer" disabled />
+          }
+
+          @if (isSingleChoiceType(q)) {
+            <div class="options">
+              @for (option of q.options; track option.id) {
+                <label>
+                  <input type="radio" disabled />
+                  {{ option.option_text }}
+                </label>
+              }
+            </div>
+          }
+
+          @if (isMultipleChoiceType(q)) {
+            <div class="options">
+              @for (option of q.options; track option.id) {
+                <label>
+                  <input type="checkbox" disabled />
+                  {{ option.option_text }}
+                </label>
+              }
+            </div>
+          }
+        </article>
+      }
+
+      <button type="button" disabled>Submit Survey</button>
+    </form>
+  }
+</section>

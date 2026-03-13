@@ -13,7 +13,7 @@
     <article class="balance">
       <h3>Balance</h3>
       <p>{{ balanceCoin }} coin</p>
-      <small>Status: {{ surveyAccessStatus }}</small>
+      <small>Status: {{ ownerStatusLabels[surveyAccessStatus] || 'Unknown Status' }}</small>
     </article>
 
     <form [formGroup]="topupForm" (ngSubmit)="topup()" class="topup">
@@ -46,18 +46,20 @@
           <th>Status</th>
           <th>Before</th>
           <th>After</th>
+          <th>Note</th>
         </tr>
       </thead>
       <tbody>
         @for (item of transactions; track item.id) {
           <tr>
             <td>{{ item.id }}</td>
-            <td>{{ item.direction }}</td>
+            <td>{{ directionLabels[item.direction] || 'Unknown Direction' }}</td>
             <td>{{ item.amount_coin }}</td>
-            <td>{{ item.reason }}</td>
-            <td>{{ item.status }}</td>
+            <td>{{ reasonLabels[item.reason] || 'Unknown Reason ' }}</td>
+            <td>{{ transactionStatusLabels[item.status] || 'Unknown Status' }}</td>
             <td>{{ item.balance_before }}</td>
             <td>{{ item.balance_after }}</td>
+            <td>{{ item.notes }}</td>
           </tr>
         }
       </tbody>

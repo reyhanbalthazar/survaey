@@ -28,6 +28,26 @@ export class OwnerDashboardComponent implements OnInit {
   surveys: OwnerSurvey[] = [];
   private qrLibReady: Promise<void> | null = null;
 
+  // Define a clear mapping object
+  readonly statusLabels: Record<string, string> = {
+    'active': 'Active',
+    'blocked_insufficient_coin': 'Account Blocked (Insufficient Coin)',
+  };
+
+  // Different colors for a badge
+  readonly statusColors: Record<string, string> = {
+    'active': 'text-green-600 bg-green-100',
+    'blocked_insufficient_coin': 'text-red-600 bg-red-100'
+  };
+
+  readonly surveyStatusLabels: Record<string, string> = {
+    'draft': 'Draft',
+    'published': 'Published',
+    'closed': 'Closed',
+    'expired': 'Expired',
+    'suspended': 'Suspended'
+  };
+
   constructor(private readonly dashboardService: OwnerDashboardService) { }
 
   ngOnInit(): void {

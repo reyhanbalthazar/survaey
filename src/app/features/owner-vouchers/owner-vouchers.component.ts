@@ -25,6 +25,12 @@ export class OwnerVouchersComponent implements OnInit {
     search: ['']
   });
 
+  readonly statusLabels: Record<string, string> = {
+    'all': 'All',
+    'issued': 'Issued',
+    'redeemed': 'Redeemed'
+  };
+
   constructor(private readonly dashboardService: OwnerDashboardService) {}
 
   ngOnInit(): void {

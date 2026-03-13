@@ -26,6 +26,29 @@ export class OwnerWalletComponent implements OnInit {
   surveyAccessStatus = 'active';
   transactions: OwnerWalletTransaction[] = [];
 
+  readonly ownerStatusLabels: Record<string, string> = {
+    'active': 'Active',
+    'blocked_insufficient_coin': 'Account Blocked (Insufficient Coin)',
+  };
+
+  readonly directionLabels: Record<string, string> = {
+    'debit': 'Debit',
+    'credit': 'Credit'
+  };
+  // ENUM('topup', 'publish_fee', 'response_fee', 'refund', 'adjustment')
+  readonly reasonLabels: Record<string, string> = {
+    'topup': 'Topup',
+    'publish_fee': 'Publish Fee',
+    'response_fee': 'Response Fee',
+    'refund': 'Refund',
+    'adjustment': 'Adjustment'
+  };
+
+  readonly transactionStatusLabels: Record<string, string> = {
+    'success': 'Success',
+    'failed': 'Failed',
+  };
+
   readonly topupForm = this.fb.nonNullable.group({
     amount_coin: [100, [Validators.required, Validators.min(1)]],
     notes: ['manual topup']
@@ -35,7 +58,7 @@ export class OwnerWalletComponent implements OnInit {
     private readonly dashboardService: OwnerDashboardService,
     private readonly route: ActivatedRoute,
     private readonly router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.handlePostPaymentState();

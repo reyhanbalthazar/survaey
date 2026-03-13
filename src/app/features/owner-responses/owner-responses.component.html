@@ -76,7 +76,7 @@
         } @else {
           <p><strong>Email:</strong> {{ selectedResponse.respondent_email }}</p>
           <p><strong>Submitted:</strong> {{ selectedResponse.submitted_at | date: 'medium' }}</p>
-          <p><strong>Status:</strong> {{ selectedResponse.status }}</p>
+          <p><strong>Status:</strong> {{ statusLabels[selectedResponse.status] || 'Unknown Status' }}</p>
 
           <hr />
 

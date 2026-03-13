@@ -5,92 +5,98 @@
   </header>
 
   @if (loading) {
-    <p>Loading dashboard...</p>
+  <p>Loading dashboard...</p>
   } @else {
-    <div class="cards">
-      <article>
-        <h3>Coin Balance</h3>
-        <p>{{ balanceCoin }} coin</p>
-      </article>
-      <article>
-        <h3>Survey Access</h3>
-        <p>{{ surveyAccessStatus }}</p>
-      </article>
-      <article>
-        <h3>Total Survey</h3>
-        <p>{{ surveys.length }}</p>
-      </article>
-    </div>
+  <div class="cards">
+    <article>
+      <h3>Coin Balance</h3>
+      <p>{{ balanceCoin }} coin</p>
+    </article>
+    <article>
+      <h3>Survey Access</h3>
+      <p [class]="statusColors[surveyAccessStatus]" class="px-2 py-1 rounded-full">
+        {{ statusLabels[surveyAccessStatus] || 'Unknown Status' }}
+      </p>
+    </article>
+    <article>
+      <h3>Total Survey</h3>
+      <p>{{ surveys.length }}</p>
+    </article>
+  </div>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Title</th>
-          <th>Status</th>
-          <th>Responses</th>
-          <th>Public Link</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (survey of surveys; track survey.id) {
-          <tr>
-            <td>{{ survey.title }}</td>
-            <td>{{ survey.status }}</td>
-            <td>{{ survey.response_count }} / {{ survey.max_responses }}</td>
-            <td class="link-cell">
-              <div class="link">{{ getPublicLink(survey.public_token) }}</div>
-              @if (survey.public_token) {
-                <div class="link-actions">
-                  <button type="button" class="copy-btn" (click)="copyPublicLink(survey)">
-                    {{ copiedSurveyId === survey.id ? 'Copied' : 'Copy Link' }}
-                  </button>
-                  <button type="button" class="copy-btn" (click)="downloadQr(survey)" [disabled]="downloadingQrSurveyId === survey.id">
-                    {{ downloadingQrSurveyId === survey.id ? 'Generating QR...' : 'Download QR' }}
-                  </button>
-                </div>
-              }
-            </td>
-            <td>
+  <table>
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Status</th>
+        <th>Responses</th>
+        <th>Public Link</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (survey of surveys; track survey.id) {
+      <tr>
+        <td>{{ survey.title }}</td>
+        <td>{{ surveyStatusLabels[survey.status] || 'Unknown Status' }}</td>
+        <td>{{ survey.response_count }} / {{ survey.max_responses }}</td>
+        <td class="link-cell">
+          <div class="link">{{ getPublicLink(survey.public_token) }}</div>
+          @if (survey.public_token) {
+          <div class="link-actions">
+            <button type="button" class="copy-btn" (click)="copyPublicLink(survey)">
+              {{ copiedSurveyId === survey.id ? 'Copied' : 'Copy Link' }}
+            </button>
+            <button type="button" class="copy-btn" (click)="downloadQr(survey)"
+              [disabled]="downloadingQrSurveyId === survey.id">
+              {{ downloadingQrSurveyId === survey.id ? 'Generating QR...' : 'Download QR' }}
+            </button>
+          </div>
+          }
+        </td>
+        <td>
               @if (survey.status === 'draft') {
                 <div class="action-group">
+                  <a [routerLink]="['/owner/surveys', survey.id, 'preview']" target="_blank" rel="noopener noreferrer">
+                    Preview Survey
+                  </a>
                   <a [routerLink]="['/owner/surveys', survey.id, 'edit']">Edit Draft</a>
                   <button type="button" (click)="openPublishConfirm(survey)" [disabled]="publishingId === survey.id">
                     {{ publishingId === survey.id ? 'Publishing...' : 'Publish (100 coin)' }}
                   </button>
                 </div>
-              }
-              @if (survey.status !== 'draft') {
-                <a [routerLink]="['/owner/surveys', survey.id, 'responses']">Review Responses</a>
-              }
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
+          }
+          @if (survey.status !== 'draft') {
+          <a [routerLink]="['/owner/surveys', survey.id, 'responses']">Review Responses</a>
+          }
+        </td>
+      </tr>
+      }
+    </tbody>
+  </table>
 
-    @if (copyError) {
-      <p class="copy-error">{{ copyError }}</p>
-    }
+  @if (copyError) {
+  <p class="copy-error">{{ copyError }}</p>
+  }
 
-    @if (qrError) {
-      <p class="copy-error">{{ qrError }}</p>
-    }
+  @if (qrError) {
+  <p class="copy-error">{{ qrError }}</p>
+  }
   }
 
   @if (publishConfirmOpen) {
-    <div class="dialog-backdrop" (click)="closePublishConfirm()">
-      <section class="dialog" (click)="$event.stopPropagation()">
-        <h3>Confirm Survey Publication</h3>
-        <p>
-          Once this survey is published, its questions and answer options can no longer be edited. A publication fee of
-          100 coins will be charged.
-        </p>
-        <div class="dialog-actions">
-          <button type="button" class="btn-secondary" (click)="closePublishConfirm()">Cancel</button>
-          <button type="button" (click)="confirmPublishSurvey()">Publish Now</button>
-        </div>
-      </section>
-    </div>
+  <div class="dialog-backdrop" (click)="closePublishConfirm()">
+    <section class="dialog" (click)="$event.stopPropagation()">
+      <h3>Confirm Survey Publication</h3>
+      <p>
+        Once this survey is published, its questions and answer options can no longer be edited. A publication fee of
+        100 coins will be charged.
+      </p>
+      <div class="dialog-actions">
+        <button type="button" class="btn-secondary" (click)="closePublishConfirm()">Cancel</button>
+        <button type="button" (click)="confirmPublishSurvey()">Publish Now</button>
+      </div>
+    </section>
+  </div>
   }
 </section>

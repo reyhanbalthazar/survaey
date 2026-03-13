@@ -9,6 +9,7 @@ import { OwnerLoginComponent } from './features/owner-login/owner-login.componen
 import { OwnerRegisterComponent } from './features/owner-register/owner-register.component';
 import { OwnerResponsesComponent } from './features/owner-responses/owner-responses.component';
 import { OwnerSurveyCreateComponent } from './features/owner-survey-create/owner-survey-create.component';
+import { OwnerSurveyPreviewComponent } from './features/owner-survey-preview/owner-survey-preview.component';
 import { OwnerVerifyEmailComponent } from './features/owner-verify-email/owner-verify-email.component';
 import { OwnerVouchersComponent } from './features/owner-vouchers/owner-vouchers.component';
 import { OwnerWalletComponent } from './features/owner-wallet/owner-wallet.component';
@@ -21,6 +22,11 @@ export const routes: Routes = [
   { path: 'owner/register', component: OwnerRegisterComponent },
   { path: 'owner/check-email', component: OwnerCheckEmailComponent },
   { path: 'owner/verify-email', component: OwnerVerifyEmailComponent },
+  {
+    path: 'owner/surveys/:id/preview',
+    component: OwnerSurveyPreviewComponent,
+    canActivate: [ownerAuthGuard]
+  },
   {
     path: 'owner',
     component: OwnerLayoutComponent,
